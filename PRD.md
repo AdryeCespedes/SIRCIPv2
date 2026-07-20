@@ -86,7 +86,6 @@ Referencia para RF-03. El padrón se descarga en formato .txt desde el menú "De
 | 7 | Campo 7 — estado del contribuyente por jurisdicción (3) | Numérico(25) | 5225355222512555552512420 |
 
 Ejemplo de registro:
-Hola Adrye
 ```
 202603,30100100106,Empresa de prueba,904,34,B,5225355222512555552512420
 ```

@@ -12,21 +12,22 @@ Administrador del padrón: Es la persona encargada de descargar el padrón del P
 Usuario facturador: Es la persona que está facturando a un cliente y que tiene que calcular los importes de percepciones de ingresos brutos para dicho cliente.
 
 ## Objetivos
-Calcular de forma correcta las percepciones de ingresos brutos a un cliente en convenio multilateral, según la provincia de entrega del comprobante a facturar y hacerlo de forma rápida.
+Calcular las percepciones de ingresos brutos a un cliente en convenio multilateral, según la provincia de entrega del comprobante a facturar, con la exactitud definida en RNF-04 y dentro del tiempo de respuesta definido en RNF-05.
 
 ## Requerimientos Funcionales
 - RF-01: El sistema debe permitir que un usuario se autentique con nombre de usuario y contraseña.
 - RF-02: El sistema debe restringir el acceso a sus funciones según dos roles de usuario fijos, Administrador y Usuario, denegando a los usuarios con rol Usuario el acceso a las funciones reservadas al rol Administrador.
-- RF-03: El sistema debe permitir que un usuario con role de Administrador pueda importar el padrón, que será un archivo con formato .txt desde una ubicación en el disco de la computadora, indicando el mes y año para el cual se está importando dicho padrón.
+- RF-03: El sistema debe permitir que un usuario con rol de Administrador pueda importar el padrón, que será un archivo con formato .txt desde una ubicación en el disco de la computadora, indicando el mes y año para el cual se está importando dicho padrón.
 - RF-04: El sistema debe registrar cada importación del padrón, dejando constancia de la fecha de importación, el período, el usuario y la cantidad de registros importados.
-- RF-05: El sistema debe calcular, a partir de un CUIT, una fecha, un importe facturado (neto gravado, sin IVA) y una provincia de entrega, aplicando las reglas definidas sobre la información del padrón, las provincias, alícuotas, tipo e importes de percepciones de ingresos brutos a facturar al cliente (ver Anexo B).
-- RF-06: El sistema debe devolver una lista vacía de percepciones de ingresos brutos para un CUIT que no esté en el padrón del período indicado.
-- RF-07: Si el período indicado para el cálculo de las percepciones no está importado, el sistema debe devolver un error de padrón inexistente para el cálculo.
+- RF-05: El sistema debe calcular, a partir de un CUIT, una fecha (cuyo año y mes determinan el período de padrón a utilizar), un importe facturado (neto gravado, sin IVA) y una provincia de entrega, aplicando las reglas definidas sobre la información del padrón, las provincias, alícuotas, tipo e importes de percepciones de ingresos brutos a facturar al cliente (ver Anexo B).
+- RF-06: El sistema debe devolver una lista vacía de percepciones de ingresos brutos para un CUIT que no esté en el padrón del período indicado, cuando la jurisdicción de entrega no esté adherida a SIRCIP (ver Anexo C).
+- RF-07: Si el período derivado de la fecha indicada para el cálculo de las percepciones (ver RF-05) no está importado, el sistema debe devolver un error de padrón inexistente para el cálculo.
 - RF-08: Si la importación del padrón genera algún error, el sistema debe registrar el error, el usuario importador, el período y la fecha de importación.
 - RF-09: El sistema debe permitir eliminar un padrón importado de un período mediante un borrado lógico: el registro de la importación no se elimina físicamente ni desaparece del historial, sino que se marca con un estado de borrado.
 - RF-10: El sistema debe tener una página, accesible solo para usuarios con rol Administrador, que permita consultar las importaciones realizadas exitosas y con errores.
 - RF-11: El sistema debe validar cada línea del archivo de padrón contra el formato de campos definido (ver Anexo A) durante la importación.
 - RF-12: Si al menos una línea del archivo de padrón no cumple el formato de campos definido (ver Anexo A), el sistema debe rechazar la importación completa del archivo, sin persistir ningún registro del período.
+- RF-13: El sistema debe calcular una percepción por no inscripto, con alícuota fija del 2% sobre el neto gravado, cuando el CUIT no esté en el padrón del período indicado y la jurisdicción de entrega esté adherida a SIRCIP (ver Anexo C).
 
 ## Requerimientos No Funcionales
 - RNF-01: La importación del padrón debe realizarse en tiempos menores al minuto para un padrón de un millón de registros.
@@ -39,13 +40,13 @@ Calcular de forma correcta las percepciones de ingresos brutos a un cliente en c
 - AC-01 (RF-01): Dado un usuario no autenticado, cuando intenta importar un padrón, entonces el sistema responde HTTP 401.
 - AC-02 (RF-01): Dado un usuario no autenticado, cuando intenta pedir el cálculo de percepciones, entonces el sistema responde HTTP 401.
 - AC-03 (RF-01): Dado un usuario con credenciales válidas dadas de alta en la base de datos, cuando envía su nombre de usuario y contraseña correctos, entonces el sistema responde HTTP 200, le provee un token de sesión y le permite iniciar sesión.
-- AC-04 (RF-02): Dado un usuario con rol Usuario autenticado, cuando intenta acceder a una función reservada al rol Administrador (por ejemplo importar o eliminar un padrón), entonces el sistema la deniega con HTTP 403 en todos los casos, dado que solo existen los dos roles fijos y no hay permisos configurables intermedios.
-- AC-05 (RF-03): Dado un usuario con role usuario, cuando intenta importar un archivo de padrón, entonces el sistema responde HTTP 403.
+- AC-04 (RF-02): Dado un usuario con rol Usuario autenticado, cuando intenta acceder a cualquiera de las funciones reservadas al rol Administrador (importar el padrón, eliminar el padrón de un período, o consultar la página de importaciones — verificadas en concreto en AC-05, AC-14 y AC-17), entonces el sistema la deniega con HTTP 403 en todos los casos, dado que solo existen los dos roles fijos y no hay permisos configurables intermedios.
+- AC-05 (RF-03): Dado un usuario con rol usuario, cuando intenta importar un archivo de padrón, entonces el sistema responde HTTP 403.
 - AC-06 (RF-03): Dado un usuario con rol Administrador autenticado, cuando importa un archivo de padrón válido en formato .txt indicando mes y año, entonces el sistema responde HTTP 200 y confirma la importación exitosa mediante un mensaje.
 - AC-07 (RF-04): Dado un Administrador que importó exitosamente un padrón para un período, cuando consulta el registro de dicha importación, entonces el sistema responde HTTP 200 y muestra la fecha de importación, el período, el usuario que la realizó y la cantidad de registros importados.
 - AC-08 (RF-05): Dado un usuario autenticado, cuando intenta calcular percepciones sin indicar el CUIT, la fecha, un importe mayor a cero o el código de provincia de entrega, entonces el sistema responde HTTP 400, dado que cualquiera de estas condiciones faltantes dispara el mismo resultado.
-- AC-09 (RF-06): Dado un usuario autenticado, cuando intenta calcular percepciones para un CUIT que no existe en el padrón del período, entonces el sistema responde HTTP 200 con una lista vacía de percepciones de ingresos brutos.
-- AC-10 (RF-07): Dado un usuario con role administrador o usuario, cuando intenta calcular percepciones para un período no importado, entonces el sistema responde HTTP 404.
+- AC-09 (RF-06): Dado un usuario autenticado, cuando intenta calcular percepciones para un CUIT que no existe en el padrón del período y la provincia de entrega no está adherida a SIRCIP según el Anexo C (por ejemplo Corrientes), entonces el sistema responde HTTP 200 con una lista vacía de percepciones de ingresos brutos.
+- AC-10 (RF-07): Dado un usuario con rol administrador o usuario, cuando intenta calcular percepciones para un período no importado, entonces el sistema responde HTTP 404.
 - AC-11 (RF-08): Dado un Administrador que intenta importar un archivo de padrón inválido o corrupto, cuando la importación falla, entonces el sistema responde HTTP 422, registra el error, el usuario importador, el período y la fecha de importación, y ese registro queda disponible para consulta.
 - AC-12 (RF-09): Dado un usuario autenticado como administrador, cuando borra el padrón de un periodo y luego consulta un CUIT de dicho padrón para ese período, entonces el sistema responde HTTP 404.
 - AC-13 (RF-09): Dado un usuario autenticado como administrador que borró el padrón de un período, cuando consulta el historial de importaciones, entonces el sistema responde HTTP 200 y muestra dicho padrón marcado como borrado.
@@ -57,20 +58,26 @@ Calcular de forma correcta las percepciones de ingresos brutos a un cliente en c
 - AC-19 (RF-11): Dado un archivo de padrón donde todas las líneas cumplen el formato de campos definido en el Anexo A, cuando un Administrador lo importa, entonces el sistema responde HTTP 200 y persiste la totalidad de los registros del período.
 - AC-20 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5555555555555555555432110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Catamarca (código Campo 7 = 2, no inscripto con sobretasa), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción por sobretasa de Catamarca de $10 (neto × 1%), totalizando $10.50 de percepciones.
 - AC-21 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,1555555555545555555512220` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Mendoza (código Campo 7 = 4, jurisdicción no adherida a SIRCIP con alta, alícuota local de Mendoza del 1.5% según Anexo B), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción local de Mendoza de $15 (neto × 1.5%), totalizando $15.50 de percepciones.
+- AC-22 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5555555555555555555432110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Capital Federal (código Campo 7 = 1, inscripto), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%).
+- AC-23 (RF-13): Dado un CUIT que no existe en el padrón del período indicado, una provincia de entrega adherida a SIRCIP según el Anexo C (por ejemplo Capital Federal) y un importe facturado (neto gravado, sin IVA) de $1000, cuando se solicita el cálculo de percepciones para dicho CUIT, entonces el sistema responde HTTP 200 y devuelve una Percepción por no inscripto de $20 (neto × 2%).
+- AC-24 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,1115111111111111111111110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Santa Fe (código Campo 7 = 5, jurisdicción no adherida a SIRCIP, sin alta), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve únicamente una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%), sin percepción local adicional.
 
 ## Fuera de Alcance
 - No hay una página de registración de usuarios. Los usuarios se dan de alta manualmente en una base de datos.
 - No puede realizarse varias veces la importación de un padrón de un período, dicho de otra forma no hay importación parcial o modificación de un padrón importado. Para volver a importarlo primero hay que eliminarlo y luego volver a importarlo.
 - No hay RBAC configurable: los permisos de los dos roles (Administrador y Usuario) son fijos, no hay pantalla ni funcionalidad para definir o modificar permisos.
 - No hay aislamiento de datos entre usuarios: el padrón, las importaciones y los cálculos son recursos compartidos entre todos los usuarios autenticados; el sistema no persiste un historial de cálculos por usuario individual.
+- No se automatiza la descarga del padrón desde el Portal Federal Tributario: esa descarga la realiza manualmente el Administrador; el sistema solo automatiza la importación y el almacenamiento a partir del archivo .txt ya descargado en disco (ver RF-03).
+- No se define comportamiento ante importaciones simultáneas del mismo período, ni ante solicitudes de cálculo mientras una importación de ese período está en curso.
 
 ## Riesgos y Dependencias
-- Riesgo: No se detecta.
+- Riesgo: La tabla de jurisdicciones adheridas a SIRCIP (Anexo C) no tiene versionado por período ni un mecanismo de actualización definido, a diferencia del padrón que se reimporta mensualmente (RF-03/RF-04). Si la adhesión de una jurisdicción cambia, no hay ningún RF que contemple actualizar esta tabla.
 - Dependencia: SQL Server para almacenar los usuarios. Usuarios ingresados en dicha base.
-- Dependencia: Documento de casos de prueba de cálculo de percepciones (entrada: CUIT, fecha, importe, provincia; salida esperada: provincias, alícuotas, tipo e importes), necesario para verificar el RNF-04. Resuelta: formalizado como AC-20 y AC-21.
+- Dependencia: Documento de casos de prueba de cálculo de percepciones (entrada: CUIT, fecha, importe, provincia; salida esperada: provincias, alícuotas, tipo e importes), necesario para verificar el RNF-04. Resuelta: formalizado como AC-20, AC-21, AC-22, AC-23 y AC-24.
 - Dependencia: tabla de alícuotas locales por jurisdicción no adherida a SIRCIP, necesaria para calcular la percepción local cuando el Campo 7 de la jurisdicción de entrega indica código 4. Resuelta: formalizada en el Anexo B, en base al archivo `SIRCIP - Padrón - Campo 7.xlsx`.
 - Dependencia: reglas para determinar el código de Campo 7 por jurisdicción y calcular el importe de percepción a partir de él. Resuelta: la determinación del código está formalizada en la tabla de aplicación de códigos del Anexo A, y el cálculo del importe (alícuota del Campo 6 sobre el neto gravado, más la percepción adicional por sobretasa del 1% cuando corresponda) está formalizado en el Anexo B.
 - Dependencia: formato del archivo de padrón (estructura de registro, separador, campos y su significado). Resuelta: formalizado en el Anexo A.
+- Dependencia: tabla de jurisdicciones adheridas a SIRCIP y alícuota fija de la percepción por no inscripto, necesarias para RF-06 y RF-13. Resuelta: formalizada en el Anexo C y en el Anexo B (2%); a diferencia de las demás tablas del Anexo B, estos datos fueron provistos directamente por el usuario del proyecto, sin archivo fuente documental citado.
 
 ## Anexo A: Diseño de Registro del Padrón (Archivo de Importación)
 Referencia para RF-03. El padrón se descarga en formato .txt desde el menú "Descargas" del sistema SIRCIP dentro del Portal Federal Tributario. Cada línea es un registro de contribuyente con campos separados por coma (CSV sin encabezado).
@@ -131,7 +138,7 @@ Ejemplos de generación e interpretación de este campo: [planilla de referencia
 | 8 | Local | Sí | No | Sí | Sí | Sí | No | 2 (puede ser 3 si el contribuyente está excluido general, en cuyo caso no se aplica la sobretasa) |
 | 9 | Local | Sí | No | No | Sí | No | No | 5 |
 
-Los casos 5 y 6 corresponden a contribuyentes que no tienen alta en ningún padrón (CM ni Local); no son un valor de Campo 7 propiamente dicho, sino la situación de un CUIT no encontrado en el padrón importado (ver RF-06).
+Los casos 5 y 6 corresponden a contribuyentes que no tienen alta en ningún padrón (CM ni Local); no son un valor de Campo 7 propiamente dicho, sino la situación de un CUIT no encontrado en el padrón importado. El caso 6 (jurisdicción de entrega no adherida a SIRCIP, ver Anexo C) no genera ninguna percepción (RF-06). El caso 5 (jurisdicción de entrega adherida a SIRCIP, ver Anexo C) genera una percepción por no inscripto con alícuota fija del 2% (RF-13, ver fórmula en Anexo B).
 
 Los ejemplos completos con el Campo 7 armado dígito a dígito para las 24 jurisdicciones (casos CM, CM con excluido general y Local) están en el archivo del proyecto `SIRCIP - Padrón - Campo 7.xlsx`, hojas "Ejemplo CM", "Ejemplo 2 CM", "Ejemplo Local" y "Excluido General".
 
@@ -142,7 +149,7 @@ Referencia para RF-05. La percepción se calcula sobre el **neto gravado** (el i
 Importe de la percepción = Neto gravado (importe facturado, sin IVA) × Alícuota (Campo 6)
 ```
 
-Este cálculo se realiza para cada jurisdicción que, según el Campo 7 (ver "Tabla de aplicación de códigos" en el Anexo A), corresponda calcular percepción.
+Este cálculo se realiza para cada jurisdicción que, según el Campo 7 (ver "Tabla de aplicación de códigos" en el Anexo A), corresponda calcular percepción. Cuando el CUIT sí está en el padrón, esta percepción base corresponde a los códigos de Campo 7 1, 2, 3, 4 y 5 (ver Anexo A).
 
 Cuando el Campo 7 de la jurisdicción indica código 2 (no inscripto con sobretasa), se genera además una **percepción adicional por sobretasa**, independiente de la anterior (no se suma a la alícuota del Campo 6), calculada sobre el mismo neto gravado con una alícuota fija del **1%**:
 
@@ -158,7 +165,15 @@ Cuando el Campo 7 de la jurisdicción de entrega indica código 4 (jurisdicción
 Importe de la percepción local = Neto gravado (importe facturado, sin IVA) × Alícuota local de la jurisdicción
 ```
 
-A diferencia de la sobretasa del código 2, la alícuota de esta percepción local no es fija: depende de la normativa propia de cada jurisdicción no adherida y no forma parte del padrón SIRCIP.
+A diferencia de la sobretasa del código 2, la alícuota de esta percepción local no es fija: depende de la normativa propia de cada jurisdicción no adherida y no forma parte del padrón SIRCIP. Cuando el código es 5 (también jurisdicción no adherida a SIRCIP, pero sin que la jurisdicción de entrega esté dada de alta para el contribuyente) no corresponde esta percepción local adicional, solo la percepción base del Campo 6.
+
+Cuando el CUIT no está en el padrón del período (RF-06/RF-13) y la jurisdicción de entrega está adherida a SIRCIP (ver Anexo C), corresponde una **percepción por no inscripto**, calculada sobre el mismo neto gravado con una alícuota fija del **2%**, sin sobretasa adicional:
+
+```
+Importe de la percepción por no inscripto = Neto gravado (importe facturado, sin IVA) × 2%
+```
+
+Cuando el CUIT no está en el padrón y la jurisdicción de entrega no está adherida a SIRCIP, no corresponde ninguna percepción (RF-06).
 
 **Tabla de alícuotas locales por jurisdicción:**
 
@@ -178,3 +193,35 @@ A diferencia de la sobretasa del código 2, la alícuota de esta percepción loc
 | 912 - La Rioja | 2% | 924 - Tucumán | 4% |
 
 Fuente: archivo del proyecto `SIRCIP - Padrón - Campo 7.xlsx`, hoja "Alicuota por jurisdicción".
+
+## Anexo C: Jurisdicciones Adheridas a SIRCIP
+Referencia para RF-06 y RF-13. Cuando el CUIT sí está en el padrón, el código de Campo 7 ya viene resuelto por CUIT y período (ver Anexo A), y es ese código el que RF-05 decodifica y aplica directamente sin necesidad de esta tabla. Pero cuando el CUIT **no** está en el padrón del período, no existe Campo 7 para ese CUIT, y el sistema debe consultar esta tabla para saber si la jurisdicción de entrega está adherida a SIRCIP: si lo está, corresponde la percepción por no inscripto del 2% (RF-13); si no lo está, no corresponde percepción (RF-06).
+
+| Jurisdicción | Adherida a SIRCIP |
+|---|---|
+| 901 - Capital Federal | Sí |
+| 902 - Buenos Aires | Sí |
+| 903 - Catamarca | Sí |
+| 904 - Córdoba | Sí |
+| 905 - Corrientes | No |
+| 906 - Chaco | Sí |
+| 907 - Chubut | Sí |
+| 908 - Entre Ríos | No |
+| 909 - Formosa | No |
+| 910 - Jujuy | Sí |
+| 911 - La Pampa | Sí |
+| 912 - La Rioja | Sí |
+| 913 - Mendoza | Sí |
+| 914 - Misiones | Sí |
+| 915 - Neuquén | Sí |
+| 916 - Río Negro | Sí |
+| 917 - Salta | Sí |
+| 918 - San Juan | Sí |
+| 919 - San Luis | No |
+| 920 - Santa Cruz | Sí |
+| 921 - Santa Fe | No |
+| 922 - Santiago del Estero | Sí |
+| 923 - Tierra del Fuego | Sí |
+| 924 - Tucumán | No |
+
+Fuente: dato provisto por el usuario del proyecto.

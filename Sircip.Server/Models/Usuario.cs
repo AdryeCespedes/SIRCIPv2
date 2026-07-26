@@ -1,3 +1,5 @@
+using Sircip.Shared.Models;
+
 namespace Sircip.Server.Models;
 
 public class Usuario

@@ -1,4 +1,4 @@
-namespace Sircip.Server.Models;
+namespace Sircip.Shared.Models;
 
 public enum Rol
 {

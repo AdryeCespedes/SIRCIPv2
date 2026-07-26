@@ -10,6 +10,9 @@ SIRCIP calcula las percepciones de Ingresos Brutos bajo Convenio Multilateral a 
 - Hash de contraseñas: BCrypt.Net-Next
 - Padrón: archivo binario propio con registros de ancho fijo ordenados por CUIT, acceso vía `MemoryMappedFile` + búsqueda binaria (sin motor externo)
 
+## Convenciones de código
+- Inyección de dependencias con constructor explícito (campos `readonly` asignados en el cuerpo del constructor), no con primary constructors de C# 12 (`class Foo(IBar bar)`).
+
 ## Cómo correr
 ```
 dotnet restore

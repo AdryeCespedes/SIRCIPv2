@@ -3,8 +3,12 @@ using Sircip.Server.Models;
 
 namespace Sircip.Server.Data;
 
-public class SircipDbContext(DbContextOptions<SircipDbContext> options) : DbContext(options)
+public class SircipDbContext : DbContext
 {
+    public SircipDbContext(DbContextOptions<SircipDbContext> options) : base(options)
+    {
+    }
+
     public DbSet<Usuario> Usuarios => Set<Usuario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

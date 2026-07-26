@@ -1,0 +1,6 @@
+@Sircip.Server_HostAddress = http://localhost:5025
+
+GET {{Sircip.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

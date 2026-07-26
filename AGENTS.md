@@ -12,6 +12,9 @@ SIRCIP calcula las percepciones de Ingresos Brutos bajo Convenio Multilateral a 
 
 ## Convenciones de código
 - Inyección de dependencias con constructor explícito (campos `readonly` asignados en el cuerpo del constructor), no con primary constructors de C# 12 (`class Foo(IBar bar)`).
+- Los nombres de carpeta van en inglés (`Models`, `Exceptions`, `Services`, `Contracts`, `Validations`), salvo las que nombran un concepto del dominio que no se traduce (`Padron`). El código en sí —clases, métodos, variables, comentarios y nombres de tests— va en español.
+- El namespace tiene que coincidir con la ruta de la carpeta: `Sircip.Server/Padron/Services/` → `namespace Sircip.Server.Padron.Services`.
+- Dentro de cada área funcional, separar por tipo de archivo en `Models/`, `Exceptions/` y `Services/`.
 
 ## Cómo correr
 ```

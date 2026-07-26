@@ -1,14 +1,14 @@
-# PRD-001: SIRCIP — Gestionador del nuevo regimen SIRCIP de percepciones de Ingresos Brutos bajo Convenio Multilateral
+# PRD-001: SIRCIP — Gestionador del nuevo régimen SIRCIP de percepciones de Ingresos Brutos bajo Convenio Multilateral
 
 ## Contexto y Problema
-Se precisa desarrollar una nueva aplicación que permita manejar el cálculo de percepciones de Ingresos Brutos, en clientes bajo Convenio Multilateral, según el nuevo regimen SIRCIP (Sistema Informático de Recaudación, Control e Información de Percepciones), que es un sistema desarrollado por la Comisión Arbitral (COMARB) para unificar, centralizar y estandarizar el régimen de percepciones de Ingresos Brutos bajo Convenio Multilateral, 
-El sistema publica un padrón por contribuyente en forma mensual. Actualmente para realizar el cálculo hay que consultar manualmente dicho padrón por CUIT en la página correspondiente y según la respuesta, evaluarla según unas determinadas reglas para disponer finalmente en qué provincias, que alícuota hay que aplicar y si hay sobretasas, para finalmente calcular el importe de las percepciones de ingresos brutos a facturar al cliente.
-Se precisa automatizar tanto la obtención de dicho padrón que puede ser muy grande con millones de registros y almacenarlo de forma que pueda ser consultado rápidamente, automatizar la obtención a partir de un CUIT, una fecha, un importe facturado y un código de provincia de entrega, la lista de provincias, alicuotas, tipo e importes de percepciones de ingresos brutos a aplicar. 
+Se precisa desarrollar una nueva aplicación que permita manejar el cálculo de percepciones de Ingresos Brutos, en clientes bajo Convenio Multilateral, según el nuevo régimen SIRCIP (Sistema Informático de Recaudación, Control e Información de Percepciones), que es un sistema desarrollado por la Comisión Arbitral (COMARB) para unificar, centralizar y estandarizar el régimen de percepciones de Ingresos Brutos bajo Convenio Multilateral.
+El sistema publica un padrón por contribuyente en forma mensual. Actualmente para realizar el cálculo hay que consultar manualmente dicho padrón por CUIT en la página correspondiente y según la respuesta, evaluarla según unas determinadas reglas para disponer finalmente en qué provincias, qué alícuota hay que aplicar y si hay sobretasas, para finalmente calcular el importe de las percepciones de ingresos brutos a facturar al cliente.
+Se precisa automatizar tanto la importación de dicho padrón, que puede ser muy grande con millones de registros, y almacenarlo de forma que pueda ser consultado rápidamente, como la obtención a partir de un CUIT, una fecha, un importe facturado y un código de provincia de entrega, la lista de provincias, alícuotas, tipo e importes de percepciones de ingresos brutos a aplicar.
 El archivo tiene un formato .TXT y una estructura informada en un documento de diseño de registro disponible.
-También hay documentos que explican en función del contenido del padrón como se calculan dichos importes de percepciones.
+También hay documentos que explican en función del contenido del padrón cómo se calculan dichos importes de percepciones.
 
 Personas:
-Administrador del padrón: Es la persona encargada de descargar el padrón del Portal Federal Tributario cuando está disponbile e importarlo en el nuevo sistema. También puede solicitar el cálculo de percepciones de ingresos brutos.
+Administrador del padrón: Es la persona encargada de descargar el padrón del Portal Federal Tributario cuando está disponible e importarlo en el nuevo sistema. También puede solicitar el cálculo de percepciones de ingresos brutos.
 Usuario facturador: Es la persona que está facturando a un cliente y que tiene que calcular los importes de percepciones de ingresos brutos para dicho cliente.
 
 ## Objetivos
@@ -17,17 +17,18 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 ## Requerimientos Funcionales
 - RF-01: El sistema debe permitir que un usuario se autentique con nombre de usuario y contraseña.
 - RF-02: El sistema debe restringir el acceso a sus funciones según dos roles de usuario fijos, Administrador y Usuario, denegando a los usuarios con rol Usuario el acceso a las funciones reservadas al rol Administrador.
-- RF-03: El sistema debe permitir que un usuario con rol de Administrador pueda importar el padrón, que será un archivo con formato .txt desde una ubicación en el disco de la computadora, indicando el mes y año para el cual se está importando dicho padrón.
+- RF-03: El sistema debe permitir que un usuario con rol de Administrador importe el padrón de un período a partir de un archivo con formato .txt ubicado en el disco del servidor, indicando la ruta del archivo y el mes y año del período.
 - RF-04: El sistema debe registrar cada importación del padrón, dejando constancia de la fecha de importación, el período, el usuario y la cantidad de registros importados.
 - RF-05: El sistema debe calcular, a partir de un CUIT, una fecha (cuyo año y mes determinan el período de padrón a utilizar), un importe facturado (neto gravado, sin IVA) y una provincia de entrega, aplicando las reglas definidas sobre la información del padrón, las provincias, alícuotas, tipo e importes de percepciones de ingresos brutos a facturar al cliente (ver Anexo B).
 - RF-06: El sistema debe devolver una lista vacía de percepciones de ingresos brutos para un CUIT que no esté en el padrón del período indicado, cuando la jurisdicción de entrega no esté adherida a SIRCIP (ver Anexo C).
 - RF-07: Si el período derivado de la fecha indicada para el cálculo de las percepciones (ver RF-05) no está importado, el sistema debe devolver un error de padrón inexistente para el cálculo.
-- RF-08: Si la importación del padrón genera algún error, el sistema debe registrar el error, el usuario importador, el período y la fecha de importación.
-- RF-09: El sistema debe permitir eliminar un padrón importado de un período mediante un borrado lógico: el registro de la importación no se elimina físicamente ni desaparece del historial, sino que se marca con un estado de borrado.
+- RF-08: Si la importación falla al leer o procesar el archivo del padrón, el sistema debe registrar el error, el usuario importador, el período y la fecha de importación.
+- RF-09: El sistema debe permitir eliminar el padrón importado de un período mediante un borrado lógico: la constancia de la importación no se elimina físicamente ni desaparece del historial, sino que se marca con un estado de borrado, y el período pasa a considerarse no importado a los efectos del cálculo de percepciones (ver RF-07) y de una nueva importación (ver RF-03).
 - RF-10: El sistema debe tener una página, accesible solo para usuarios con rol Administrador, que permita consultar las importaciones realizadas exitosas y con errores.
 - RF-11: El sistema debe validar cada línea del archivo de padrón contra el formato de campos definido (ver Anexo A) durante la importación.
 - RF-12: Si al menos una línea del archivo de padrón no cumple el formato de campos definido (ver Anexo A), el sistema debe rechazar la importación completa del archivo, sin persistir ningún registro del período.
 - RF-13: El sistema debe calcular una percepción por no inscripto, con alícuota fija del 2% sobre el neto gravado, cuando el CUIT no esté en el padrón del período indicado y la jurisdicción de entrega esté adherida a SIRCIP (ver Anexo C).
+- RF-14: El sistema debe rechazar la importación cuando la ruta del archivo indicada (ver RF-03) quede fuera del directorio de importación configurado, sin leer dicho archivo.
 
 ## Requerimientos No Funcionales
 - RNF-01: La importación del padrón debe realizarse en tiempos menores al minuto para un padrón de un millón de registros.
@@ -42,13 +43,13 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 - AC-03 (RF-01): Dado un usuario con credenciales válidas dadas de alta en la base de datos, cuando envía su nombre de usuario y contraseña correctos, entonces el sistema responde HTTP 200, le provee un token de sesión y le permite iniciar sesión.
 - AC-04 (RF-02): Dado un usuario con rol Usuario autenticado, cuando intenta acceder a cualquiera de las funciones reservadas al rol Administrador (importar el padrón, eliminar el padrón de un período, o consultar la página de importaciones — verificadas en concreto en AC-05, AC-14 y AC-17), entonces el sistema la deniega con HTTP 403 en todos los casos, dado que solo existen los dos roles fijos y no hay permisos configurables intermedios.
 - AC-05 (RF-03): Dado un usuario con rol usuario, cuando intenta importar un archivo de padrón, entonces el sistema responde HTTP 403.
-- AC-06 (RF-03): Dado un usuario con rol Administrador autenticado, cuando importa un archivo de padrón válido en formato .txt indicando mes y año, entonces el sistema responde HTTP 200 y confirma la importación exitosa mediante un mensaje.
+- AC-06 (RF-03): Dado un usuario con rol Administrador autenticado, cuando importa un archivo de padrón válido en formato .txt indicando la ruta del archivo, el mes y el año, entonces el sistema responde HTTP 200 y devuelve la constancia de la importación con el período importado y la cantidad de registros incorporados.
 - AC-07 (RF-04): Dado un Administrador que importó exitosamente un padrón para un período, cuando consulta el registro de dicha importación, entonces el sistema responde HTTP 200 y muestra la fecha de importación, el período, el usuario que la realizó y la cantidad de registros importados.
 - AC-08 (RF-05): Dado un usuario autenticado, cuando intenta calcular percepciones sin indicar el CUIT, la fecha, un importe mayor a cero o el código de provincia de entrega, entonces el sistema responde HTTP 400, dado que cualquiera de estas condiciones faltantes dispara el mismo resultado.
 - AC-09 (RF-06): Dado un usuario autenticado, cuando intenta calcular percepciones para un CUIT que no existe en el padrón del período y la provincia de entrega no está adherida a SIRCIP según el Anexo C (por ejemplo Corrientes), entonces el sistema responde HTTP 200 con una lista vacía de percepciones de ingresos brutos.
 - AC-10 (RF-07): Dado un usuario con rol administrador o usuario, cuando intenta calcular percepciones para un período no importado, entonces el sistema responde HTTP 404.
 - AC-11 (RF-08): Dado un Administrador que intenta importar un archivo de padrón inválido o corrupto, cuando la importación falla, entonces el sistema responde HTTP 422, registra el error, el usuario importador, el período y la fecha de importación, y ese registro queda disponible para consulta.
-- AC-12 (RF-09): Dado un usuario autenticado como administrador, cuando borra el padrón de un periodo y luego consulta un CUIT de dicho padrón para ese período, entonces el sistema responde HTTP 404.
+- AC-12 (RF-09): Dado un usuario autenticado como administrador, cuando borra el padrón de un período y luego consulta un CUIT de dicho padrón para ese período, entonces el sistema responde HTTP 404.
 - AC-13 (RF-09): Dado un usuario autenticado como administrador que borró el padrón de un período, cuando consulta el historial de importaciones, entonces el sistema responde HTTP 200 y muestra dicho padrón marcado como borrado.
 - AC-14 (RF-09): Dado un usuario con rol Usuario autenticado, cuando intenta eliminar el padrón de un período, entonces el sistema responde HTTP 403.
 - AC-15 (RF-10): Dado un usuario autenticado con rol Administrador, cuando accede a la página de consulta de importaciones, entonces el sistema responde HTTP 200 y muestra el listado de importaciones realizadas, tanto las exitosas como las que tuvieron error.
@@ -62,12 +63,19 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 - AC-23 (RF-13): Dado un CUIT que no existe en el padrón del período indicado, una provincia de entrega adherida a SIRCIP según el Anexo C (por ejemplo Capital Federal) y un importe facturado (neto gravado, sin IVA) de $1000, cuando se solicita el cálculo de percepciones para dicho CUIT, entonces el sistema responde HTTP 200 y devuelve una Percepción por no inscripto de $20 (neto × 2%).
 - AC-24 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,1115111111111111111111110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Santa Fe (código Campo 7 = 5, jurisdicción no adherida a SIRCIP, sin alta), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve únicamente una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%), sin percepción local adicional.
 
+- AC-25 (RF-14): Dado un usuario con rol Administrador autenticado, cuando solicita importar un padrón indicando una ruta que, una vez resuelta, queda fuera del directorio de importación configurado, entonces el sistema responde HTTP 400, no lee el archivo indicado y no registra la importación en el historial.
+- AC-26 (RF-08): Dado un usuario con rol Administrador autenticado, cuando solicita importar un padrón indicando una ruta dentro del directorio de importación configurado en la que no existe ningún archivo, entonces el sistema responde HTTP 422, registra la importación como fallida y esa constancia queda disponible para consulta.
+- AC-27 (RNF-01): Dado un archivo de padrón válido de un millón de registros, cuando un Administrador lo importa, entonces el sistema responde HTTP 200 y la importación completa demora menos de 60 segundos.
+- AC-28 (RNF-02): Dado un usuario dado de alta en la base de datos, cuando se inspecciona la contraseña almacenada para ese usuario, entonces el valor guardado es un hash bcrypt y no coincide con la contraseña en texto plano.
+- AC-29 (RNF-03): Dado un usuario autenticado cuya última actividad ocurrió hace más de 24 horas, cuando solicita una operación que requiere autenticación, entonces el sistema responde HTTP 401.
+- AC-30 (RNF-05): Dado un padrón importado de un millón de registros, cuando se solicitan al menos 1.000 cálculos individuales de percepciones, entonces el percentil 99 del tiempo de respuesta es menor a 2 segundos.
 ## Fuera de Alcance
 - No hay una página de registración de usuarios. Los usuarios se dan de alta manualmente en una base de datos.
 - No puede realizarse varias veces la importación de un padrón de un período, dicho de otra forma no hay importación parcial o modificación de un padrón importado. Para volver a importarlo primero hay que eliminarlo y luego volver a importarlo.
 - No hay RBAC configurable: los permisos de los dos roles (Administrador y Usuario) son fijos, no hay pantalla ni funcionalidad para definir o modificar permisos.
 - No hay aislamiento de datos entre usuarios: el padrón, las importaciones y los cálculos son recursos compartidos entre todos los usuarios autenticados; el sistema no persiste un historial de cálculos por usuario individual.
-- No se automatiza la descarga del padrón desde el Portal Federal Tributario: esa descarga la realiza manualmente el Administrador; el sistema solo automatiza la importación y el almacenamiento a partir del archivo .txt ya descargado en disco (ver RF-03).
+- No se automatiza la descarga del padrón desde el Portal Federal Tributario: esa descarga la realiza manualmente el Administrador; el sistema solo automatiza la importación y el almacenamiento a partir del archivo .txt ya descargado y dejado en el disco del servidor, dentro del directorio de importación configurado (ver RF-03).
+- No se suben archivos de padrón desde el navegador: no hay pantalla de carga de archivos. El Administrador deja el .txt en el disco del servidor y el sistema lo lee de ahí indicando su ruta (ver RF-03).
 - No se define comportamiento ante importaciones simultáneas del mismo período, ni ante solicitudes de cálculo mientras una importación de ese período está en curso.
 
 ## Riesgos y Dependencias
@@ -82,8 +90,8 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 ## Anexo A: Diseño de Registro del Padrón (Archivo de Importación)
 Referencia para RF-03. El padrón se descarga en formato .txt desde el menú "Descargas" del sistema SIRCIP dentro del Portal Federal Tributario. Cada línea es un registro de contribuyente con campos separados por coma (CSV sin encabezado).
 
-| Nro. | Campo | Descripción | Formato | Ejemplo |
-|---|---|---|---|---|
+| Nro. | Campo | Formato | Ejemplo |
+|---|---|---|---|
 | 1 | Período del padrón | aaaamm | 202603 |
 | 2 | Nº de CUIT del contribuyente | Numérico(11) | 30100100106 |
 | 3 | Razón social del contribuyente | Alfanumérico(70) | Empresa de prueba |

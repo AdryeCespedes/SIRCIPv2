@@ -25,6 +25,11 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.NombreUsuario) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            return BadRequest("Debe indicar nombre de usuario y contraseña.");
+        }
+
         var usuario = await _db.Usuarios
             .SingleOrDefaultAsync(u => u.NombreUsuario == request.NombreUsuario);
 

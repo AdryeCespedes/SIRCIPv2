@@ -26,7 +26,7 @@ public static class ParserPadron
     public const int LargoCampo7 = 25;
 
     /// <summary>Jurisdicciones del Convenio Multilateral codificadas en el Campo 7.</summary>
-    public const int CantidadJurisdicciones = 24;
+    public const int CantidadJurisdicciones = Jurisdicciones.Cantidad;
 
     /// <summary>
     /// Intenta parsear una línea del padrón. Si devuelve <c>false</c>,

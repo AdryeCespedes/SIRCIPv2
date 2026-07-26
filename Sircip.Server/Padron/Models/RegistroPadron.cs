@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Models;
 
 /// <summary>
 /// Registro de contribuyente del padrón, tal como viene en cada línea del

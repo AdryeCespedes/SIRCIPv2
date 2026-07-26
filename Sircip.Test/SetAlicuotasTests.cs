@@ -1,4 +1,4 @@
-using Sircip.Server.Padron;
+using Sircip.Server.Padron.Models;
 
 namespace Sircip.Test;
 

@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Exceptions;
 
 /// <summary>
 /// El archivo de padrón trae el mismo CUIT más de una vez en el período. La

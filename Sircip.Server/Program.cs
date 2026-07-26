@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Sircip.Server.Auth;
 using Sircip.Server.Data;
+using Sircip.Server.Padron;
+using Sircip.Server.Padron.Exceptions;
+using Sircip.Server.Padron.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +65,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<SeedUsuario>();
 
+builder.Services.Configure<OpcionesPadron>(builder.Configuration.GetSection(OpcionesPadron.SectionName));
+builder.Services.AddSingleton<AlmacenPadron>();
+builder.Services.AddScoped<ServicioImportacionPadron>();
+
 var app = builder.Build();
 
 if (args.Contains("--seed-admin"))
@@ -70,6 +77,8 @@ if (args.Contains("--seed-admin"))
     await scope.ServiceProvider.GetRequiredService<SeedUsuario>().EjecutarAsync();
     return;
 }
+
+app.Services.GetRequiredService<AlmacenPadron>().AsegurarDirectorios();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

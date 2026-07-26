@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Models;
 
 /// <summary>
 /// Disposición del archivo binario del padrón de un período: un encabezado

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sircip.Server.Data;
 
@@ -11,9 +12,11 @@ using Sircip.Server.Data;
 namespace Sircip.Server.Migrations
 {
     [DbContext(typeof(SircipDbContext))]
-    partial class SircipDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726224045_Importaciones")]
+    partial class Importaciones
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

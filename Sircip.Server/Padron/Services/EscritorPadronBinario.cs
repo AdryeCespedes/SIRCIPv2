@@ -1,6 +1,8 @@
+using Sircip.Server.Padron.Exceptions;
+using Sircip.Server.Padron.Models;
 using System.Buffers.Binary;
 
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Services;
 
 /// <summary>
 /// Arma el archivo binario del padrón de un período: se le van agregando los

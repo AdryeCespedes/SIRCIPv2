@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Models;
 
 /// <summary>
 /// Contribuyente encontrado en el padrón de un período. Es lo que devuelve el

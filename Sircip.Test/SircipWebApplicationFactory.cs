@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Sircip.Server.Data;
 using Sircip.Server.Models;
+using Sircip.Shared.Contracts;
 using Sircip.Shared.Models;
 
 namespace Sircip.Test;
@@ -22,6 +25,14 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
     public const string NombreUsuarioComun = "usuario-test";
     public const string PasswordUsuario = "usuario-password";
 
+    private readonly string _directorioRaiz = Directory.CreateTempSubdirectory("sircip-test-").FullName;
+
+    /// <summary>Única carpeta de la que la API acepta archivos .txt para importar.</summary>
+    public string DirectorioImportacion => Path.Combine(_directorioRaiz, "importacion");
+
+    /// <summary>Carpeta donde la API deja los .bin de cada período.</summary>
+    public string DirectorioDatos => Path.Combine(_directorioRaiz, "datos");
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment(Environments.Production);
@@ -31,6 +42,8 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseSetting("Jwt:Audience", "SircipClient");
         builder.UseSetting("Jwt:Key", "clave-solo-para-tests-de-al-menos-32-caracteres");
         builder.UseSetting("Jwt:ExpirationHours", "24");
+        builder.UseSetting("Padron:DirectorioImportacion", DirectorioImportacion);
+        builder.UseSetting("Padron:DirectorioDatos", DirectorioDatos);
 
         var nombreBase = Guid.NewGuid().ToString();
         builder.ConfigureServices(services =>
@@ -63,5 +76,35 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
         db.SaveChanges();
 
         return host;
+    }
+
+    public Task<HttpClient> CrearClienteAdminAsync() =>
+        CrearClienteAutenticadoAsync(NombreUsuarioAdmin, PasswordAdmin);
+
+    public Task<HttpClient> CrearClienteUsuarioAsync() =>
+        CrearClienteAutenticadoAsync(NombreUsuarioComun, PasswordUsuario);
+
+    private async Task<HttpClient> CrearClienteAutenticadoAsync(string nombreUsuario, string password)
+    {
+        var cliente = CreateClient();
+
+        var respuesta = await cliente.PostAsJsonAsync(
+            "/api/auth/login", new LoginRequest { NombreUsuario = nombreUsuario, Password = password });
+        respuesta.EnsureSuccessStatusCode();
+
+        var login = await respuesta.Content.ReadFromJsonAsync<LoginResponse>();
+        cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login!.Token);
+
+        return cliente;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing && Directory.Exists(_directorioRaiz))
+        {
+            Directory.Delete(_directorioRaiz, recursive: true);
+        }
     }
 }

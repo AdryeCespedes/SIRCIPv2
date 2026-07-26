@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Models;
 
 /// <summary>
 /// Las 24 jurisdicciones del Convenio Multilateral, identificadas con los

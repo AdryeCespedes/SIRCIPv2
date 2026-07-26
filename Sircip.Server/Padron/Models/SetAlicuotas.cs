@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Models;
 
 /// <summary>
 /// Set de alícuotas del Campo 6 del padrón (Anexo A, nota 2). Cada letra

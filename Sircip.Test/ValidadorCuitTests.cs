@@ -1,4 +1,4 @@
-using Sircip.Shared.Validaciones;
+using Sircip.Shared.Validations;
 
 namespace Sircip.Test;
 

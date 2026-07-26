@@ -1,4 +1,4 @@
-namespace Sircip.Shared.Validaciones;
+namespace Sircip.Shared.Validations;
 
 /// <summary>
 /// Valida el dígito verificador del CUIT: módulo 11 sobre los primeros 10

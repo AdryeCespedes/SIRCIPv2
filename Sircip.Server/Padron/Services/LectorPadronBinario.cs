@@ -1,6 +1,8 @@
+using Sircip.Server.Padron.Exceptions;
+using Sircip.Server.Padron.Models;
 using System.IO.MemoryMappedFiles;
 
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Services;
 
 /// <summary>
 /// Busca contribuyentes por CUIT en el archivo binario de un período.

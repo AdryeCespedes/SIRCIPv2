@@ -1,4 +1,4 @@
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Exceptions;
 
 /// <summary>
 /// El archivo binario de un período no se puede leer: no tiene el encabezado

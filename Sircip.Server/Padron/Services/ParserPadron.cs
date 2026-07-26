@@ -1,8 +1,9 @@
+using Sircip.Server.Padron.Models;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Sircip.Shared.Validaciones;
+using Sircip.Shared.Validations;
 
-namespace Sircip.Server.Padron;
+namespace Sircip.Server.Padron.Services;
 
 /// <summary>
 /// Valida y parsea las líneas del archivo .txt del padrón contra el diseño de

@@ -57,11 +57,11 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 - AC-17 (RF-10): Dado un usuario con rol Usuario autenticado, cuando intenta acceder a la página de consulta de importaciones, entonces el sistema responde HTTP 403.
 - AC-18 (RF-12): Dado un archivo de padrón con al menos una línea que no cumple el formato de campos definido en el Anexo A, cuando un Administrador lo importa, entonces el sistema responde HTTP 422, rechaza la importación completa, no persiste ningún registro de dicho período, y registra el error conforme a RF-08.
 - AC-19 (RF-11): Dado un archivo de padrón donde todas las líneas cumplen el formato de campos definido en el Anexo A, cuando un Administrador lo importa, entonces el sistema responde HTTP 200 y persiste la totalidad de los registros del período.
-- AC-20 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5555555555555555555432110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Catamarca (código Campo 7 = 2, no inscripto con sobretasa), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción por sobretasa de Catamarca de $10 (neto × 1%), totalizando $10.50 de percepciones.
-- AC-21 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,1555555555545555555512220` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Mendoza (código Campo 7 = 4, jurisdicción no adherida a SIRCIP con alta, alícuota local de Mendoza del 1.5% según Anexo B), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción local de Mendoza de $15 (neto × 1.5%), totalizando $15.50 de percepciones.
-- AC-22 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5555555555555555555432110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Capital Federal (código Campo 7 = 1, inscripto), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%).
-- AC-23 (RF-13): Dado un CUIT que no existe en el padrón del período indicado, una provincia de entrega adherida a SIRCIP según el Anexo C (por ejemplo Capital Federal) y un importe facturado (neto gravado, sin IVA) de $1000, cuando se solicita el cálculo de percepciones para dicho CUIT, entonces el sistema responde HTTP 200 y devuelve una Percepción por no inscripto de $20 (neto × 2%).
-- AC-24 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,1115111111111111111111110` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Santa Fe (código Campo 7 = 5, jurisdicción no adherida a SIRCIP, sin alta), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve únicamente una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%), sin percepción local adicional.
+- AC-20 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5225252222222225522512540` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Catamarca (código Campo 7 = 2, no inscripto con sobretasa), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción por sobretasa de Catamarca de $10 (neto × 1%), totalizando $10.50 de percepciones.
+- AC-21 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5225252222222225522512540` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Capital Federal (código Campo 7 = 4, jurisdicción no adherida a SIRCIP con alta, alícuota local de Capital Federal del 1.5% según Anexo B), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%) y una Percepción local de Capital Federal de $15 (neto × 1.5%), totalizando $15.50 de percepciones.
+- AC-22 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5225252222222225522512540` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Córdoba (código Campo 7 = 1, inscripto), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%).
+- AC-23 (RF-13): Dado un CUIT que no existe en el padrón del período indicado, una provincia de entrega adherida a SIRCIP según el Anexo C (por ejemplo Córdoba) y un importe facturado (neto gravado, sin IVA) de $1000, cuando se solicita el cálculo de percepciones para dicho CUIT, entonces el sistema responde HTTP 200 y devuelve una Percepción por no inscripto de $20 (neto × 2%).
+- AC-24 (RF-05, RNF-04): Dado el padrón importado con la línea `202603,30100100106,XXXX SA,901,34,C,5225252222222225522512540` (letra de alícuota C = 0.05%), un importe facturado (neto gravado, sin IVA) de $1000 y provincia de entrega Santa Fe (código Campo 7 = 5, jurisdicción no adherida a SIRCIP, sin alta), cuando se solicita el cálculo de percepciones para el CUIT 30100100106, entonces el sistema responde HTTP 200 y devuelve únicamente una Percepción IIBB SIRCIP de $0.50 (neto × 0.05%), sin percepción local adicional.
 
 - AC-25 (RF-14): Dado un usuario con rol Administrador autenticado, cuando solicita importar un padrón indicando una ruta que, una vez resuelta, queda fuera del directorio de importación configurado, entonces el sistema responde HTTP 400, no lee el archivo indicado y no registra la importación en el historial.
 - AC-26 (RF-08): Dado un usuario con rol Administrador autenticado, cuando solicita importar un padrón indicando una ruta dentro del directorio de importación configurado en la que no existe ningún archivo, entonces el sistema responde HTTP 422, registra la importación como fallida y esa constancia queda disponible para consulta.
@@ -88,7 +88,13 @@ Calcular las percepciones de ingresos brutos a un cliente en convenio multilater
 - Dependencia: tabla de jurisdicciones adheridas a SIRCIP y alícuota fija de la percepción por no inscripto, necesarias para RF-06 y RF-13. Resuelta: formalizada en el Anexo C y en el Anexo B (2%); a diferencia de las demás tablas del Anexo B, estos datos fueron provistos directamente por el usuario del proyecto, sin archivo fuente documental citado.
 
 ## Anexo A: Diseño de Registro del Padrón (Archivo de Importación)
-Referencia para RF-03. El padrón se descarga en formato .txt desde el menú "Descargas" del sistema SIRCIP dentro del Portal Federal Tributario. Cada línea es un registro de contribuyente con campos separados por coma (CSV sin encabezado).
+Referencia para RF-03. El padrón se descarga en formato .txt desde el menú "Descargas" del sistema SIRCIP dentro del Portal Federal Tributario. Es un CSV cuya primera línea trae los nombres de las columnas y se descarta al importar; cada línea siguiente es un registro de contribuyente con campos separados por coma. El archivo usa fin de línea CRLF.
+
+Encabezado tal como viene en el archivo:
+
+```
+periodo,cuit,razon_social_contri,jurisdiccion_sede,crc,alicuota_unica_letra,campo7
+```
 
 | Nro. | Campo | Formato | Ejemplo |
 |---|---|---|---|
@@ -207,8 +213,8 @@ Referencia para RF-06 y RF-13. Cuando el CUIT sí está en el padrón, el códig
 
 | Jurisdicción | Adherida a SIRCIP |
 |---|---|
-| 901 - Capital Federal | Sí |
-| 902 - Buenos Aires | Sí |
+| 901 - Capital Federal | No |
+| 902 - Buenos Aires | No |
 | 903 - Catamarca | Sí |
 | 904 - Córdoba | Sí |
 | 905 - Corrientes | No |
@@ -232,6 +238,6 @@ Referencia para RF-06 y RF-13. Cuando el CUIT sí está en el padrón, el códig
 | 923 - Tierra del Fuego | Sí |
 | 924 - Tucumán | No |
 
-Fuente: dato provisto por el usuario del proyecto.
+Fuente: dato provisto por el usuario del proyecto. Las jurisdicciones 901 y 902 figuraban como adheridas y se corrigieron a No a partir del padrón real del período 202602: las 24 jurisdicciones se contrastaron contra el Campo 7 de los contribuyentes cuya jurisdicción sede es cada una, y en 22 casos el padrón coincidía con esta tabla (código 1 para las adheridas, 4 para las no adheridas), mientras que en 901 y 902 el padrón indicaba código 4 en la totalidad de los 653 contribuyentes con sede en ellas.
 
 ***

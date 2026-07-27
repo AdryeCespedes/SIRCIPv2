@@ -8,12 +8,14 @@ using Sircip.Server.Data;
 using Sircip.Server.Padron;
 using Sircip.Server.Padron.Exceptions;
 using Sircip.Server.Padron.Services;
+using Sircip.Shared.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opciones => JsonSircip.Configurar(opciones.JsonSerializerOptions));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

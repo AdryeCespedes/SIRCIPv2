@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using Sircip.Shared.Contracts;
+using Sircip.Shared.Serialization;
 
 namespace Sircip.Client.Services;
 
@@ -25,6 +26,6 @@ public class AuthApiClient
             return null;
         }
 
-        return await response.Content.ReadFromJsonAsync<LoginResponse>();
+        return await response.Content.ReadFromJsonAsync<LoginResponse>(JsonSircip.Opciones);
     }
 }

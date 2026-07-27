@@ -10,6 +10,7 @@ using Sircip.Server.Data;
 using Sircip.Server.Models;
 using Sircip.Shared.Contracts;
 using Sircip.Shared.Models;
+using Sircip.Shared.Serialization;
 
 namespace Sircip.Test;
 
@@ -21,6 +22,10 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
 {
     public const string NombreUsuarioAdmin = "admin-test";
     public const string PasswordAdmin = "admin-password";
+
+    /// <summary>Segundo administrador, para verificar que cada uno ve las importaciones del otro (AC-16).</summary>
+    public const string NombreUsuarioOtroAdmin = "otro-admin-test";
+    public const string PasswordOtroAdmin = "otro-admin-password";
 
     public const string NombreUsuarioComun = "usuario-test";
     public const string PasswordUsuario = "usuario-password";
@@ -69,6 +74,12 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
             },
             new Usuario
             {
+                NombreUsuario = NombreUsuarioOtroAdmin,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(PasswordOtroAdmin),
+                Rol = Rol.Administrador
+            },
+            new Usuario
+            {
                 NombreUsuario = NombreUsuarioComun,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(PasswordUsuario),
                 Rol = Rol.Usuario
@@ -81,6 +92,9 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
     public Task<HttpClient> CrearClienteAdminAsync() =>
         CrearClienteAutenticadoAsync(NombreUsuarioAdmin, PasswordAdmin);
 
+    public Task<HttpClient> CrearClienteOtroAdminAsync() =>
+        CrearClienteAutenticadoAsync(NombreUsuarioOtroAdmin, PasswordOtroAdmin);
+
     public Task<HttpClient> CrearClienteUsuarioAsync() =>
         CrearClienteAutenticadoAsync(NombreUsuarioComun, PasswordUsuario);
 
@@ -92,7 +106,7 @@ public class SircipWebApplicationFactory : WebApplicationFactory<Program>
             "/api/auth/login", new LoginRequest { NombreUsuario = nombreUsuario, Password = password });
         respuesta.EnsureSuccessStatusCode();
 
-        var login = await respuesta.Content.ReadFromJsonAsync<LoginResponse>();
+        var login = await respuesta.Content.ReadFromJsonAsync<LoginResponse>(JsonSircip.Opciones);
         cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login!.Token);
 
         return cliente;

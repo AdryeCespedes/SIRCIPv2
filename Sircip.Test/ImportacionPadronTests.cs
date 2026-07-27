@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Sircip.Server.Padron.Services;
 using Sircip.Shared.Contracts;
 using Sircip.Shared.Models;
+using Sircip.Shared.Serialization;
 
 namespace Sircip.Test;
 
@@ -91,7 +92,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(importacion);
         Assert.Equal(periodo, importacion.Periodo);
         Assert.Equal(25, importacion.CantidadRegistros);
@@ -109,13 +110,13 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         var antes = DateTime.UtcNow.AddSeconds(-5);
 
         var importada = await (await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo)))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
 
         var respuesta = await cliente.GetAsync($"/api/padron/importaciones/{importada!.Id}");
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var consultada = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var consultada = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(consultada);
         Assert.Equal(periodo, consultada.Periodo);
         Assert.Equal(SircipWebApplicationFactory.NombreUsuarioAdmin, consultada.Usuario);
@@ -175,7 +176,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
 
-        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(fallida);
         Assert.Equal(EstadoImportacion.ConError, fallida.Estado);
         Assert.Equal(periodo, fallida.Periodo);
@@ -183,7 +184,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         Assert.Contains("Línea 2", fallida.Error);
 
         var consultada = await (await cliente.GetAsync($"/api/padron/importaciones/{fallida.Id}"))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.Equal(EstadoImportacion.ConError, consultada!.Estado);
         Assert.Equal(fallida.Error, consultada.Error);
     }
@@ -262,13 +263,13 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
 
-        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(fallida);
         Assert.Equal(EstadoImportacion.ConError, fallida.Estado);
         Assert.Contains("No se encontró el archivo", fallida.Error);
 
         var consultada = await (await cliente.GetAsync($"/api/padron/importaciones/{fallida.Id}"))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(consultada);
         Assert.Equal(EstadoImportacion.ConError, consultada.Estado);
         Assert.Equal(202609, consultada.Periodo);
@@ -288,7 +289,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
 
-        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.Contains("período 202512", fallida!.Error);
         Assert.False(File.Exists(RutaBinaria(periodoDeclarado)));
     }
@@ -323,7 +324,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(importacion);
         Assert.Equal(periodo, importacion.Periodo);
         Assert.Equal(9, importacion.CantidadRegistros);
@@ -405,7 +406,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.Equal(2, importacion!.CantidadRegistros);
     }
 
@@ -422,7 +423,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
-        Assert.Equal(1, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>())!.CantidadRegistros);
+        Assert.Equal(1, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones))!.CantidadRegistros);
     }
 
     /// <summary>
@@ -443,7 +444,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
 
-        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.Contains("Línea 1", fallida!.Error);
         Assert.False(File.Exists(RutaBinaria(periodo)));
     }
@@ -459,7 +460,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
-        Assert.Equal(4, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>())!.CantidadRegistros);
+        Assert.Equal(4, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones))!.CantidadRegistros);
     }
 
     /// <summary>Un salto de línea de más no puede tirar abajo una importación válida.</summary>
@@ -479,7 +480,7 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.Equal(2, importacion!.CantidadRegistros);
     }
 }

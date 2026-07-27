@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Sircip.Shared.Contracts;
 using Sircip.Shared.Models;
+using Sircip.Shared.Serialization;
 
 namespace Sircip.Test;
 
@@ -44,7 +45,7 @@ public class EliminacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, nombre));
         respuesta.EnsureSuccessStatusCode();
 
-        return (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>())!;
+        return (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones))!;
     }
 
     [Fact]
@@ -79,7 +80,7 @@ public class EliminacionPadronTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
 
-        var borrada = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        var borrada = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         Assert.NotNull(borrada);
         Assert.Equal(EstadoImportacion.Borrada, borrada.Estado);
         Assert.Equal(periodo, borrada.Periodo);
@@ -99,7 +100,7 @@ public class EliminacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         await cliente.DeleteAsync(Url(periodo));
 
         var consultada = await (await cliente.GetAsync($"/api/padron/importaciones/{importada.Id}"))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
 
         Assert.NotNull(consultada);
         Assert.Equal(importada.Id, consultada.Id);
@@ -179,9 +180,9 @@ public class EliminacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         Assert.NotEqual(primera.Id, segunda.Id);
 
         var borrada = await (await cliente.GetAsync($"/api/padron/importaciones/{primera.Id}"))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
         var vigente = await (await cliente.GetAsync($"/api/padron/importaciones/{segunda.Id}"))
-            .Content.ReadFromJsonAsync<ImportacionResponse>();
+            .Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
 
         Assert.Equal(EstadoImportacion.Borrada, borrada!.Estado);
         Assert.Equal(EstadoImportacion.Exitosa, vigente!.Estado);

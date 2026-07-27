@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Sircip.Shared.Contracts;
 using Sircip.Shared.Models;
+using Sircip.Shared.Serialization;
 
 namespace Sircip.Test;
 
@@ -29,7 +30,7 @@ public class AuthTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var login = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        var login = await response.Content.ReadFromJsonAsync<LoginResponse>(JsonSircip.Opciones);
         Assert.NotNull(login);
         Assert.False(string.IsNullOrWhiteSpace(login.Token));
         Assert.Equal(SircipWebApplicationFactory.NombreUsuarioAdmin, login.NombreUsuario);
@@ -48,7 +49,7 @@ public class AuthTests : IClassFixture<SircipWebApplicationFactory>
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var login = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        var login = await response.Content.ReadFromJsonAsync<LoginResponse>(JsonSircip.Opciones);
         Assert.NotNull(login);
         Assert.Equal(Rol.Usuario, login.Rol);
     }
@@ -107,7 +108,7 @@ public class AuthTests : IClassFixture<SircipWebApplicationFactory>
 
         var loginResponse = await client.PostAsJsonAsync("/api/auth/login",
             Credenciales(SircipWebApplicationFactory.NombreUsuarioAdmin, SircipWebApplicationFactory.PasswordAdmin));
-        var login = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var login = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(JsonSircip.Opciones);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login!.Token);
         var response = await client.GetAsync("/api/auth/me");

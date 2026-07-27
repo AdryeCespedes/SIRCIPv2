@@ -17,6 +17,9 @@ namespace Sircip.Server.Padron.Services;
 /// </summary>
 public class ServicioImportacionPadron
 {
+    /// <summary>Nombre de la primera columna del encabezado del archivo del padrón.</summary>
+    private const string PrimerCampoDelEncabezado = "periodo";
+
     private readonly SircipDbContext _db;
     private readonly AlmacenPadron _almacen;
     private readonly ILogger<ServicioImportacionPadron> _logger;
@@ -96,6 +99,11 @@ public class ServicioImportacionPadron
         {
             numeroLinea++;
 
+            if (numeroLinea == 1 && EsEncabezado(linea))
+            {
+                continue;
+            }
+
             // Una línea en blanco no aporta ningún registro, así que se saltea en
             // vez de tirar abajo el archivo entero por un salto de línea de más.
             if (string.IsNullOrWhiteSpace(linea))
@@ -142,6 +150,21 @@ public class ServicioImportacionPadron
             "Padrón del período {Periodo} importado con {Cantidad} registros.", periodo, escritor.Cantidad);
 
         return escritor.Cantidad;
+    }
+
+    /// <summary>
+    /// El padrón que se descarga del Portal trae una primera línea con los
+    /// nombres de las columnas.
+    ///
+    /// Se la reconoce por su primer campo y no por "no parsea como registro":
+    /// si la primera línea fuera un registro mal formado hay que rechazar el
+    /// archivo entero (RF-12), no saltearla en silencio. Un registro real
+    /// siempre arranca con el período en dígitos, nunca con la palabra.
+    /// </summary>
+    private static bool EsEncabezado(string linea)
+    {
+        var primerCampo = linea.Split(',')[0].Trim();
+        return primerCampo.Equals(PrimerCampoDelEncabezado, StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<Importacion> RegistrarAsync(

@@ -386,6 +386,82 @@ public class ImportacionPadronTests : IClassFixture<SircipWebApplicationFactory>
         Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
     }
 
+    /// <summary>
+    /// El archivo que se descarga del Portal trae una primera línea con los
+    /// nombres de las columnas, que no es un registro y no se cuenta.
+    /// </summary>
+    [Fact]
+    public async Task Importar_ConLaLineaDeEncabezado_LaDescartaEImportaElResto()
+    {
+        const int periodo = 202704;
+        var archivo = DejarArchivo(
+            "padron-con-encabezado.txt",
+            "periodo,cuit,razon_social_contri,jurisdiccion_sede,crc,alicuota_unica_letra,campo7",
+            PadronDePrueba.Linea(periodo, PadronDePrueba.Cuit(0)),
+            PadronDePrueba.Linea(periodo, PadronDePrueba.Cuit(1)));
+        var cliente = await _factory.CrearClienteAdminAsync();
+
+        var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
+
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
+
+        var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        Assert.Equal(2, importacion!.CantidadRegistros);
+    }
+
+    [Fact]
+    public async Task Importar_ConEncabezadoEnMayusculas_TambienLoDescarta()
+    {
+        const int periodo = 202705;
+        var archivo = DejarArchivo(
+            "padron-encabezado-mayusculas.txt",
+            "PERIODO,CUIT,RAZON_SOCIAL_CONTRI,JURISDICCION_SEDE,CRC,ALICUOTA_UNICA_LETRA,CAMPO7",
+            PadronDePrueba.Linea(periodo, PadronDePrueba.Cuit(0)));
+        var cliente = await _factory.CrearClienteAdminAsync();
+
+        var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
+
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
+        Assert.Equal(1, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>())!.CantidadRegistros);
+    }
+
+    /// <summary>
+    /// Descartar el encabezado no puede volverse una excusa para tragarse una
+    /// primera línea mal formada: eso rompería RF-12.
+    /// </summary>
+    [Fact]
+    public async Task Importar_ConLaPrimeraLineaInvalidaQueNoEsEncabezado_RechazaElArchivo()
+    {
+        const int periodo = 202706;
+        var archivo = DejarArchivo(
+            "padron-primera-linea-rota.txt",
+            $"{periodo},99999999999,Empresa,904,34,B,{PadronDePrueba.Campo7}",
+            PadronDePrueba.Linea(periodo, PadronDePrueba.Cuit(0)));
+        var cliente = await _factory.CrearClienteAdminAsync();
+
+        var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, respuesta.StatusCode);
+
+        var fallida = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>();
+        Assert.Contains("Línea 1", fallida!.Error);
+        Assert.False(File.Exists(RutaBinaria(periodo)));
+    }
+
+    /// <summary>Un archivo sin encabezado, como lo describe el Anexo A, sigue funcionando.</summary>
+    [Fact]
+    public async Task Importar_SinLineaDeEncabezado_ImportaTodasLasLineas()
+    {
+        const int periodo = 202707;
+        var archivo = DejarPadronValido("padron-sin-encabezado.txt", periodo, cantidadRegistros: 4);
+        var cliente = await _factory.CrearClienteAdminAsync();
+
+        var respuesta = await cliente.PostAsJsonAsync("/api/padron/importaciones", Pedido(periodo, archivo));
+
+        Assert.Equal(HttpStatusCode.OK, respuesta.StatusCode);
+        Assert.Equal(4, (await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>())!.CantidadRegistros);
+    }
+
     /// <summary>Un salto de línea de más no puede tirar abajo una importación válida.</summary>
     [Fact]
     public async Task Importar_ConLineasEnBlanco_LasSalteaEImportaElResto()

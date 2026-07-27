@@ -73,6 +73,44 @@ public class PadronApiClient
                 : mensaje);
     }
 
+    /// <summary>Elimina el padrón de un período con borrado lógico (RF-09).</summary>
+    public async Task<ResultadoEliminacion> EliminarAsync(int anio, int mes)
+    {
+        var pedido = new HttpRequestMessage(HttpMethod.Delete, $"api/padron/importaciones/{anio}/{mes}");
+
+        var respuesta = await EnviarAsync(pedido);
+
+        if (respuesta.IsSuccessStatusCode)
+        {
+            var importacion = await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
+            return ResultadoEliminacion.Ok(importacion!);
+        }
+
+        var mensaje = await respuesta.Content.ReadAsStringAsync();
+        return ResultadoEliminacion.Fallo(
+            string.IsNullOrWhiteSpace(mensaje)
+                ? $"La eliminación falló con el código {(int)respuesta.StatusCode}."
+                : mensaje);
+    }
+
+    /// <summary>
+    /// Constancia vigente de un período, o <c>null</c> si no tiene padrón
+    /// importado. Es lo que la pantalla de confirmación muestra antes de borrar.
+    /// </summary>
+    public async Task<ImportacionResponse?> ObtenerImportacionVigenteAsync(int anio, int mes)
+    {
+        var pedido = new HttpRequestMessage(HttpMethod.Get, $"api/padron/importaciones/{anio}/{mes}");
+
+        var respuesta = await EnviarAsync(pedido);
+
+        if (!respuesta.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        return await respuesta.Content.ReadFromJsonAsync<ImportacionResponse>(JsonSircip.Opciones);
+    }
+
     private async Task<HttpResponseMessage> EnviarAsync(HttpRequestMessage pedido)
     {
         var token = await ObtenerTokenAsync();

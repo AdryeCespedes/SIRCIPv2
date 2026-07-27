@@ -9,6 +9,14 @@
     Historial de todas las importaciones realizadas, las propias y las de los demás administradores.
 </p>
 
+@if (Borrado is not null)
+{
+    <div class="alert alert-success">
+        Se eliminó el padrón de <strong>@FormatearPeriodoBorrado(Borrado)</strong>.
+        La constancia sigue en el historial marcada como borrada.
+    </div>
+}
+
 @if (_error is not null)
 {
     <div class="alert alert-danger">@_error</div>
@@ -33,6 +41,7 @@ else
                     <th>Fecha (UTC)</th>
                     <th>Usuario</th>
                     <th>Detalle del error</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -51,6 +60,17 @@ else
                         <td>@importacion.FechaImportacionUtc.ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@importacion.Usuario</td>
                         <td class="detalle-error">@importacion.Error</td>
+                        <td class="text-end">
+                            @* Solo se puede eliminar el padrón vigente: las fallidas no
+                               tienen nada que borrar y las borradas ya lo están. *@
+                            @if (importacion.Estado == EstadoImportacion.Exitosa)
+                            {
+                                <a class="btn btn-outline-danger btn-sm"
+                                   href="@($"importaciones/eliminar/{importacion.Periodo / 100}/{importacion.Periodo % 100}")">
+                                    Eliminar
+                                </a>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -59,6 +79,10 @@ else
 }
 
 @code {
+    /// <summary>Período recién borrado, con formato aaaa-mm, para avisarlo al volver acá.</summary>
+    [SupplyParameterFromQuery(Name = "borrado")]
+    public string? Borrado { get; set; }
+
     private IReadOnlyList<ImportacionResponse>? _importaciones;
     private string? _error;
 
@@ -76,6 +100,13 @@ else
 
     /// <summary>El período se guarda como aaaamm y se muestra como mm/aaaa.</summary>
     private static string FormatearPeriodo(int periodo) => $"{periodo % 100:00}/{periodo / 100}";
+
+    /// <summary>El aviso llega como aaaa-mm por la query y se muestra como mm/aaaa.</summary>
+    private static string FormatearPeriodoBorrado(string borrado)
+    {
+        var partes = borrado.Split('-');
+        return partes.Length == 2 ? $"{partes[1]}/{partes[0]}" : borrado;
+    }
 
     /// <summary>
     /// El cliente trae Bootstrap 5.1, donde las clases text-bg-* todavía no

@@ -1,0 +1,84 @@
+@page "/importaciones/eliminar/{Anio:int}/{Mes:int}"
+@attribute [Authorize(Roles = "Administrador")]
+@inject PadronApiClient PadronApi
+@inject NavigationManager Navegacion
+
+<PageTitle>Eliminar padrón</PageTitle>
+
+<h1>Eliminar padrón</h1>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+    <p><a href="importaciones">Volver al historial</a></p>
+}
+else if (_importacion is null)
+{
+    <p><em>Buscando el padrón del período…</em></p>
+}
+else
+{
+    <div class="alert alert-warning">
+        <p class="mb-2">
+            Vas a eliminar el padrón de <strong>@FormatearPeriodo(_importacion.Periodo)</strong>,
+            con <strong>@_importacion.CantidadRegistros.ToString("N0")</strong> registros,
+            importado por <strong>@_importacion.Usuario</strong>
+            el @_importacion.FechaImportacionUtc.ToString("dd/MM/yyyy HH:mm") UTC.
+        </p>
+        <p class="mb-0">
+            A partir de ahí no se van a poder calcular percepciones para ese período hasta que
+            alguien vuelva a importarlo. La constancia no desaparece: queda en el historial
+            marcada como borrada.
+        </p>
+    </div>
+
+    <EditForm Model="_importacion" OnValidSubmit="EliminarAsync" FormName="eliminar-padron">
+        <button type="submit" class="btn btn-danger btn-sm">Eliminar el padrón</button>
+        <a href="importaciones" class="btn btn-outline-secondary btn-sm ms-2">Cancelar</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Anio { get; set; }
+
+    [Parameter]
+    public int Mes { get; set; }
+
+    private ImportacionResponse? _importacion;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _importacion = await PadronApi.ObtenerImportacionVigenteAsync(Anio, Mes);
+
+            if (_importacion is null)
+            {
+                _error = $"El período {Mes:00}/{Anio} no tiene un padrón importado que eliminar.";
+            }
+        }
+        catch (HttpRequestException excepcion)
+        {
+            _error = $"No se pudo consultar el padrón del período: {excepcion.Message}";
+        }
+    }
+
+    private async Task EliminarAsync()
+    {
+        var resultado = await PadronApi.EliminarAsync(Anio, Mes);
+
+        if (!resultado.Exitosa)
+        {
+            _error = resultado.Error;
+            return;
+        }
+
+        // Se redirige en vez de quedarse acá: si no, refrescar la página
+        // reenviaría el borrado sobre un período que ya no lo admite.
+        Navegacion.NavigateTo($"importaciones?borrado={Anio}-{Mes:00}");
+    }
+
+    private static string FormatearPeriodo(int periodo) => $"{periodo % 100:00}/{periodo / 100}";
+}

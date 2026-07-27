@@ -77,10 +77,15 @@ else
     /// <summary>El período se guarda como aaaamm y se muestra como mm/aaaa.</summary>
     private static string FormatearPeriodo(int periodo) => $"{periodo % 100:00}/{periodo / 100}";
 
+    /// <summary>
+    /// El cliente trae Bootstrap 5.1, donde las clases text-bg-* todavía no
+    /// existen: hay que usar bg-*, porque .badge ya deja el texto en blanco y
+    /// sin una clase de fondo el estado queda blanco sobre blanco.
+    /// </summary>
     private static string ClaseDelEstado(EstadoImportacion estado) => estado switch
     {
-        EstadoImportacion.Exitosa => "text-bg-success",
-        EstadoImportacion.ConError => "text-bg-danger",
-        _ => "text-bg-secondary"
+        EstadoImportacion.Exitosa => "bg-success",
+        EstadoImportacion.ConError => "bg-danger",
+        _ => "bg-secondary"
     };
 }

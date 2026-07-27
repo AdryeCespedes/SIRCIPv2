@@ -2,11 +2,75 @@
 
 <PageTitle>SIRCIP</PageTitle>
 
-<h1>SIRCIP</h1>
+@* El estilo cuelga de elementos HTML escritos acá, que son los que reciben el
+   atributo de scope del CSS aislado. *@
+<div class="home">
 
-<p>
-    SIRCIP automatiza el cálculo de las percepciones de Ingresos Brutos bajo Convenio
-    Multilateral, a partir del padrón mensual publicado por COMARB (Comisión Arbitral).
-    Permite importar el padrón y, para un CUIT, fecha, importe facturado y provincia de
-    entrega, obtener las percepciones de Ingresos Brutos que corresponde aplicar.
-</p>
+    <section class="portada">
+        <h1>SIRCIP</h1>
+        <p class="bajada">
+            Cálculo de percepciones de Ingresos Brutos bajo Convenio Multilateral.
+        </p>
+        <p class="descripcion">
+            A partir del padrón mensual que publica la Comisión Arbitral (COMARB), el sistema
+            resuelve qué percepciones corresponde aplicarle a un cliente: para un CUIT, una
+            fecha, un importe facturado y una provincia de entrega, devuelve las jurisdicciones,
+            las alícuotas y los importes a facturar.
+        </p>
+    </section>
+
+    <AuthorizeView>
+        <NotAuthorized>
+            <div class="acceso">
+                <p>Necesitás iniciar sesión para usar el sistema.</p>
+                <a class="boton" href="login">Iniciar sesión</a>
+            </div>
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="Administrador">
+        <div class="acciones">
+            <a class="accion" href="importar">
+                <span class="accion-titulo">Importar padrón</span>
+                <span class="accion-detalle">Cargar el padrón mensual de un período</span>
+            </a>
+            <a class="accion" href="importaciones">
+                <span class="accion-titulo">Ver importaciones</span>
+                <span class="accion-detalle">Historial de todo lo importado</span>
+            </a>
+        </div>
+    </AuthorizeView>
+
+    <section class="pasos">
+        <h2>Cómo funciona</h2>
+        <div class="tarjetas">
+            <div class="tarjeta">
+                <span class="numero-paso">1</span>
+                <h3>Se importa el padrón</h3>
+                <p>
+                    El Administrador descarga el padrón del Portal Federal Tributario y lo importa.
+                    Se valida entero: si una sola línea no cumple el formato, se rechaza el archivo
+                    completo y no queda nada a medias.
+                </p>
+            </div>
+            <div class="tarjeta">
+                <span class="numero-paso">2</span>
+                <h3>Queda constancia</h3>
+                <p>
+                    Cada importación registra el período, la fecha, quién la hizo y cuántos
+                    registros entraron. Las que fallan también, con el motivo, así se puede ver
+                    qué pasó.
+                </p>
+            </div>
+            <div class="tarjeta">
+                <span class="numero-paso">3</span>
+                <h3>Se calculan las percepciones</h3>
+                <p>
+                    Con el padrón cargado, el sistema decodifica la situación del contribuyente en
+                    cada jurisdicción y aplica las alícuotas, las sobretasas y las percepciones por
+                    no inscripto que correspondan.
+                </p>
+            </div>
+        </div>
+    </section>
+</div>

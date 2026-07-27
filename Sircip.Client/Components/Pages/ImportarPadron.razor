@@ -4,56 +4,67 @@
 
 <PageTitle>Importar padrón</PageTitle>
 
-<h1>Importar padrón</h1>
-<p class="text-muted">
-    El archivo .txt tiene que estar en el directorio de importación del servidor.
-    Indicá su nombre y el período al que corresponde.
-</p>
+@* El div envuelve al EditForm a propósito: Blazor solo le pone el atributo de
+   scope a los elementos HTML escritos acá, no a lo que renderiza un componente
+   hijo, así que una clase puesta sobre el EditForm no recibiría estilo. *@
+<div class="importar-wrapper">
 
-@if (_resultado is { Exitosa: true, Importacion: not null })
-{
-    <div class="alert alert-success">
-        Se importó el padrón de <strong>@FormatearPeriodo(_resultado.Importacion.Periodo)</strong>
-        con <strong>@_resultado.Importacion.CantidadRegistros.ToString("N0")</strong> registros.
-        <a href="importaciones" class="alert-link">Ver el historial</a>.
+    @if (_resultado is { Exitosa: true, Importacion: not null })
+    {
+        <div class="aviso aviso-exito">
+            <strong>Padrón importado.</strong>
+            Período @FormatearPeriodo(_resultado.Importacion.Periodo),
+            @_resultado.Importacion.CantidadRegistros.ToString("N0") registros.
+            <a href="importaciones">Ver el historial</a>
+        </div>
+    }
+    else if (_resultado is { Exitosa: false })
+    {
+        <div class="aviso aviso-error">
+            <strong>No se importó el padrón.</strong>
+            @_resultado.Error
+        </div>
+    }
+
+    <div class="importar-card">
+        <h1>Importar padrón</h1>
+        <p class="importar-subtitulo">
+            El padrón mensual que descargaste del Portal Federal Tributario.
+        </p>
+
+        <EditForm Model="Formulario" OnValidSubmit="ImportarAsync" FormName="importar-padron">
+            <DataAnnotationsValidator />
+
+            <div class="campos-periodo">
+                <div class="campo-anio">
+                    <label class="form-label" for="anio">Año</label>
+                    <InputNumber id="anio" class="form-control form-control-sm" @bind-Value="Formulario.Anio" />
+                </div>
+                <div class="campo-mes">
+                    <label class="form-label" for="mes">Mes</label>
+                    <InputSelect id="mes" class="form-select form-select-sm" @bind-Value="Formulario.Mes">
+                        @for (var numero = 1; numero <= 12; numero++)
+                        {
+                            var mes = numero;
+                            <option value="@mes">@($"{mes:00} · {NombreDelMes(mes)}")</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <ValidationMessage For="() => Formulario.Anio" />
+
+            <div class="campo-archivo">
+                <label class="form-label" for="ruta">Archivo</label>
+                <InputText id="ruta" class="form-control form-control-sm" @bind-Value="Formulario.RutaArchivo"
+                           placeholder="padron-202602.txt" />
+                <ValidationMessage For="() => Formulario.RutaArchivo" />
+                <p class="ayuda">Tiene que estar en el directorio de importación del servidor.</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm boton-importar">Importar</button>
+        </EditForm>
     </div>
-}
-else if (_resultado is { Exitosa: false })
-{
-    <div class="alert alert-danger">
-        No se importó el padrón: @_resultado.Error
-    </div>
-}
-
-<EditForm Model="Formulario" OnValidSubmit="ImportarAsync" FormName="importar-padron" class="formulario-importar">
-    <DataAnnotationsValidator />
-
-    <div class="mb-3">
-        <label class="form-label" for="anio">Año</label>
-        <InputNumber id="anio" class="form-control form-control-sm" @bind-Value="Formulario.Anio" />
-        <ValidationMessage For="() => Formulario.Anio" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label" for="mes">Mes</label>
-        <InputSelect id="mes" class="form-select form-select-sm" @bind-Value="Formulario.Mes">
-            @for (var numero = 1; numero <= 12; numero++)
-            {
-                var mes = numero;
-                <option value="@mes">@($"{mes:00} - {NombreDelMes(mes)}")</option>
-            }
-        </InputSelect>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label" for="ruta">Archivo</label>
-        <InputText id="ruta" class="form-control form-control-sm" @bind-Value="Formulario.RutaArchivo"
-                   placeholder="padron-202602.txt" />
-        <ValidationMessage For="() => Formulario.RutaArchivo" />
-    </div>
-
-    <button type="submit" class="btn btn-primary btn-sm">Importar</button>
-</EditForm>
+</div>
 
 @code {
     [SupplyParameterFromForm]

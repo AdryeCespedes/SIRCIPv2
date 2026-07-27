@@ -1,14 +1,93 @@
-.formulario-importar {
-    max-width: 24rem;
+.importar-wrapper {
+    max-width: 26rem;
+    padding-top: 1rem;
 }
 
-.formulario-importar ::deep .form-label {
+.importar-card {
+    background-color: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    padding: 1.75rem;
+}
+
+.importar-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.importar-subtitulo {
+    color: #6c757d;
     font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+/* El año es corto y el mes largo: no tiene sentido darles el mismo ancho. */
+.campos-periodo {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.campo-anio {
+    flex: 0 0 6.5rem;
+}
+
+.campo-mes {
+    flex: 1;
+}
+
+.campo-archivo {
+    margin-top: 1rem;
+}
+
+.importar-card label {
+    color: #495057;
+    font-size: 0.8125rem;
     font-weight: 500;
     margin-bottom: 0.25rem;
 }
 
-.formulario-importar ::deep .validation-message {
+.ayuda {
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin: 0.35rem 0 0;
+}
+
+.boton-importar {
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+/* Los mensajes de validación los renderiza ValidationMessage, así que hay que
+   atravesar el scope con ::deep para alcanzarlos. */
+.importar-card ::deep .validation-message {
     color: #b02a25;
-    font-size: 0.8125rem;
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.35rem;
+}
+
+.aviso {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.aviso-exito {
+    background-color: #e8f6ec;
+    border: 1px solid #b7dfc4;
+    color: #1c6b34;
+}
+
+.aviso-error {
+    background-color: #fdeaea;
+    border: 1px solid #f5c2c0;
+    color: #b02a25;
+}
+
+.aviso a {
+    color: inherit;
+    font-weight: 500;
 }

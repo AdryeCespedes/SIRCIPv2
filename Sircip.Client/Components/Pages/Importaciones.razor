@@ -4,79 +4,92 @@
 
 <PageTitle>Importaciones del padrón</PageTitle>
 
-<h1>Importaciones del padrón</h1>
-<p class="text-muted">
-    Historial de todas las importaciones realizadas, las propias y las de los demás administradores.
-</p>
+@* Todo el estilo cuelga de elementos HTML escritos acá, que son los que reciben
+   el atributo de scope del CSS aislado. *@
+<div class="historial">
 
-@if (Borrado is not null)
-{
-    <div class="alert alert-success">
-        Se eliminó el padrón de <strong>@FormatearPeriodoBorrado(Borrado)</strong>.
-        La constancia sigue en el historial marcada como borrada.
+    <div class="encabezado">
+        <h1>Importaciones del padrón</h1>
+        <p class="subtitulo">
+            Todas las importaciones realizadas, las propias y las de los demás administradores.
+        </p>
     </div>
-}
 
-@if (_error is not null)
-{
-    <div class="alert alert-danger">@_error</div>
-}
-else if (_importaciones is null)
-{
-    <p><em>Cargando el historial…</em></p>
-}
-else if (_importaciones.Count == 0)
-{
-    <p>Todavía no se importó ningún padrón.</p>
-}
-else
-{
-    <div class="table-responsive">
-        <table class="table table-sm align-middle">
-            <thead>
-                <tr>
-                    <th>Período</th>
-                    <th>Estado</th>
-                    <th class="text-end">Registros</th>
-                    <th>Fecha (UTC)</th>
-                    <th>Usuario</th>
-                    <th>Detalle del error</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var importacion in _importaciones)
-                {
+    @if (Borrado is not null)
+    {
+        <div class="aviso aviso-exito">
+            <strong>Padrón eliminado.</strong>
+            Período @FormatearPeriodoBorrado(Borrado). La constancia sigue en el historial
+            marcada como borrada.
+        </div>
+    }
+
+    @if (_error is not null)
+    {
+        <div class="aviso aviso-error">@_error</div>
+    }
+    else if (_importaciones is null)
+    {
+        <p class="estado-vacio">Cargando el historial…</p>
+    }
+    else if (_importaciones.Count == 0)
+    {
+        <div class="tarjeta estado-vacio">
+            <p>Todavía no se importó ningún padrón.</p>
+            <a href="importar">Importar el primero</a>
+        </div>
+    }
+    else
+    {
+        <div class="tarjeta">
+            <table class="grilla">
+                <thead>
                     <tr>
-                        <td>@FormatearPeriodo(importacion.Periodo)</td>
-                        <td>
-                            <span class="badge @ClaseDelEstado(importacion.Estado)">@importacion.Estado</span>
-                        </td>
-                        <td class="text-end">
-                            @(importacion.Estado == EstadoImportacion.ConError
-                                ? "—"
-                                : importacion.CantidadRegistros.ToString("N0"))
-                        </td>
-                        <td>@importacion.FechaImportacionUtc.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td>@importacion.Usuario</td>
-                        <td class="detalle-error">@importacion.Error</td>
-                        <td class="text-end">
-                            @* Solo se puede eliminar el padrón vigente: las fallidas no
-                               tienen nada que borrar y las borradas ya lo están. *@
-                            @if (importacion.Estado == EstadoImportacion.Exitosa)
-                            {
-                                <a class="btn btn-outline-danger btn-sm"
-                                   href="@($"importaciones/eliminar/{importacion.Periodo / 100}/{importacion.Periodo % 100}")">
-                                    Eliminar
-                                </a>
-                            }
-                        </td>
+                        <th>Período</th>
+                        <th>Estado</th>
+                        <th class="numero">Registros</th>
+                        <th>Fecha (UTC)</th>
+                        <th>Usuario</th>
+                        <th>Detalle del error</th>
+                        <th class="acciones"></th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-}
+                </thead>
+                <tbody>
+                    @foreach (var importacion in _importaciones)
+                    {
+                        <tr>
+                            <td class="periodo">@FormatearPeriodo(importacion.Periodo)</td>
+                            <td>
+                                <span class="estado @ClaseDelEstado(importacion.Estado)">
+                                    @importacion.Estado
+                                </span>
+                            </td>
+                            <td class="numero">
+                                @(importacion.Estado == EstadoImportacion.ConError
+                                    ? "—"
+                                    : importacion.CantidadRegistros.ToString("N0"))
+                            </td>
+                            <td class="fecha">@importacion.FechaImportacionUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@importacion.Usuario</td>
+                            <td class="detalle-error" title="@importacion.Error">@importacion.Error</td>
+                            <td class="acciones">
+                                @* Solo se puede eliminar el padrón vigente: las fallidas no
+                                   tienen nada que borrar y las borradas ya lo están. *@
+                                @if (importacion.Estado == EstadoImportacion.Exitosa)
+                                {
+                                    <a class="boton-eliminar"
+                                       href="@($"importaciones/eliminar/{importacion.Periodo / 100}/{importacion.Periodo % 100}")">
+                                        Eliminar
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
 
 @code {
     /// <summary>Período recién borrado, con formato aaaa-mm, para avisarlo al volver acá.</summary>
@@ -109,14 +122,14 @@ else
     }
 
     /// <summary>
-    /// El cliente trae Bootstrap 5.1, donde las clases text-bg-* todavía no
-    /// existen: hay que usar bg-*, porque .badge ya deja el texto en blanco y
-    /// sin una clase de fondo el estado queda blanco sobre blanco.
+    /// Los colores del estado salen del CSS de esta página y no de clases de
+    /// Bootstrap: las de la librería cambiaron de nombre entre versiones y una
+    /// que no existe no falla, simplemente no pinta nada.
     /// </summary>
     private static string ClaseDelEstado(EstadoImportacion estado) => estado switch
     {
-        EstadoImportacion.Exitosa => "bg-success",
-        EstadoImportacion.ConError => "bg-danger",
-        _ => "bg-secondary"
+        EstadoImportacion.Exitosa => "estado-exitosa",
+        EstadoImportacion.ConError => "estado-error",
+        _ => "estado-borrada"
     };
 }

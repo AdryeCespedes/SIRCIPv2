@@ -1,5 +1,180 @@
+.historial {
+    padding-top: 1rem;
+}
+
+.encabezado h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.subtitulo {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 1.25rem;
+}
+
+.tarjeta {
+    background-color: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.grilla {
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin: 0;
+    width: 100%;
+}
+
+.grilla thead th {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e3e3e3;
+    color: #6c757d;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.grilla tbody td {
+    border-top: 1px solid #f0f0f0;
+    color: #212529;
+    padding: 0.65rem 0.9rem;
+    vertical-align: middle;
+}
+
+.grilla tbody tr:first-child td {
+    border-top: none;
+}
+
+.grilla tbody tr:hover td {
+    background-color: #fafbfc;
+}
+
+/* Los números alineados a la derecha y con ancho de dígito fijo se comparan de
+   un vistazo entre filas; si no, 942 y 1.000.000 no arrancan en el mismo lugar.
+   El encabezado se alinea en la misma regla que las celdas: si se dejara solo
+   `.numero`, la regla de `.grilla thead th` le ganaría por especificidad y el
+   título quedaría a la izquierda de su propia columna. */
+.grilla thead th.numero,
+.grilla tbody td.numero {
+    text-align: right;
+}
+
+.grilla tbody .numero,
+.grilla tbody .periodo,
+.grilla tbody .fecha {
+    font-variant-numeric: tabular-nums;
+}
+
+.periodo {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.fecha {
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.estado {
+    border-radius: 1rem;
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.2rem 0.6rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.estado-exitosa {
+    background-color: #e8f6ec;
+    border: 1px solid #b7dfc4;
+    color: #1c6b34;
+}
+
+.estado-error {
+    background-color: #fdeaea;
+    border: 1px solid #f5c2c0;
+    color: #b02a25;
+}
+
+.estado-borrada {
+    background-color: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+/* El error puede ser largo: se corta con puntos suspensivos y el texto completo
+   queda en el title de la celda. */
 .detalle-error {
     color: #b02a25;
     font-size: 0.8125rem;
-    max-width: 28rem;
+    max-width: 22rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.grilla thead th.acciones,
+.grilla tbody td.acciones {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.boton-eliminar {
+    border: 1px solid #f0c5c3;
+    border-radius: 0.375rem;
+    color: #b02a25;
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    text-decoration: none;
+}
+
+.boton-eliminar:hover {
+    background-color: #b02a25;
+    border-color: #b02a25;
+    color: #fff;
+}
+
+.estado-vacio {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.tarjeta.estado-vacio {
+    padding: 2rem;
+    text-align: center;
+}
+
+.tarjeta.estado-vacio p {
+    margin-bottom: 0.5rem;
+}
+
+.aviso {
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+}
+
+.aviso-exito {
+    background-color: #e8f6ec;
+    border: 1px solid #b7dfc4;
+    color: #1c6b34;
+}
+
+.aviso-error {
+    background-color: #fdeaea;
+    border: 1px solid #f5c2c0;
+    color: #b02a25;
 }

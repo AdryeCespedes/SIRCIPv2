@@ -17,11 +17,15 @@ builder.Services.AddHttpClient("SircipApi", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 builder.Services.AddScoped<AuthApiClient>();
+builder.Services.AddScoped<PadronApiClient>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/login";
+        // Sin esto, un usuario autenticado con el rol equivocado termina en la
+        // ruta por defecto /Account/AccessDenied, que no existe, y ve un 404.
+        options.AccessDeniedPath = "/sin-permisos";
         options.ExpireTimeSpan = TimeSpan.FromHours(24);
         options.SlidingExpiration = true;
     });

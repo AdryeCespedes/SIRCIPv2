@@ -16,3 +16,6 @@ obj/
 # OS
 .DS_Store
 Thumbs.db
+
+# Datos del padrón generados en tiempo de ejecución (.txt a importar y .bin por período)
+Sircip.Server/Datos/

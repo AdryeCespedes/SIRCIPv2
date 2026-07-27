@@ -78,6 +78,28 @@ public class PadronController : ControllerBase
         return Ok(respuesta);
     }
 
+    /// <summary>
+    /// Lista todas las importaciones realizadas, exitosas y con error (RF-10).
+    ///
+    /// No filtra por usuario: las importaciones son un recurso compartido y cada
+    /// Administrador ve también las de los demás (AC-16). De la más reciente a
+    /// la más antigua, que es como se mira un historial.
+    /// </summary>
+    [HttpGet("importaciones")]
+    public async Task<ActionResult<IReadOnlyList<ImportacionResponse>>> ListarImportaciones(
+        CancellationToken cancelacion)
+    {
+        var importaciones = await _db.Importaciones
+            .Include(i => i.Usuario)
+            .OrderByDescending(i => i.FechaImportacionUtc)
+            .ThenByDescending(i => i.Id)
+            .ToListAsync(cancelacion);
+
+        return Ok(importaciones
+            .Select(i => AResponse(i, i.Usuario.NombreUsuario))
+            .ToList());
+    }
+
     /// <summary>Consulta la constancia de una importación (RF-04, RF-08).</summary>
     [HttpGet("importaciones/{id:int}")]
     public async Task<ActionResult<ImportacionResponse>> ObtenerImportacion(int id, CancellationToken cancelacion)

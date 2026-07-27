@@ -1,0 +1,86 @@
+@page "/importaciones"
+@attribute [Authorize(Roles = "Administrador")]
+@inject PadronApiClient PadronApi
+
+<PageTitle>Importaciones del padrón</PageTitle>
+
+<h1>Importaciones del padrón</h1>
+<p class="text-muted">
+    Historial de todas las importaciones realizadas, las propias y las de los demás administradores.
+</p>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_importaciones is null)
+{
+    <p><em>Cargando el historial…</em></p>
+}
+else if (_importaciones.Count == 0)
+{
+    <p>Todavía no se importó ningún padrón.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr>
+                    <th>Período</th>
+                    <th>Estado</th>
+                    <th class="text-end">Registros</th>
+                    <th>Fecha (UTC)</th>
+                    <th>Usuario</th>
+                    <th>Detalle del error</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var importacion in _importaciones)
+                {
+                    <tr>
+                        <td>@FormatearPeriodo(importacion.Periodo)</td>
+                        <td>
+                            <span class="badge @ClaseDelEstado(importacion.Estado)">@importacion.Estado</span>
+                        </td>
+                        <td class="text-end">
+                            @(importacion.Estado == EstadoImportacion.ConError
+                                ? "—"
+                                : importacion.CantidadRegistros.ToString("N0"))
+                        </td>
+                        <td>@importacion.FechaImportacionUtc.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@importacion.Usuario</td>
+                        <td class="detalle-error">@importacion.Error</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<ImportacionResponse>? _importaciones;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _importaciones = await PadronApi.ObtenerImportacionesAsync();
+        }
+        catch (HttpRequestException excepcion)
+        {
+            _error = $"No se pudo consultar el historial de importaciones: {excepcion.Message}";
+        }
+    }
+
+    /// <summary>El período se guarda como aaaamm y se muestra como mm/aaaa.</summary>
+    private static string FormatearPeriodo(int periodo) => $"{periodo % 100:00}/{periodo / 100}";
+
+    private static string ClaseDelEstado(EstadoImportacion estado) => estado switch
+    {
+        EstadoImportacion.Exitosa => "text-bg-success",
+        EstadoImportacion.ConError => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+}

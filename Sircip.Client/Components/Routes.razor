@@ -1,6 +1,19 @@
 ﻿<Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                @if (context.User.Identity?.IsAuthenticated is true)
+                {
+                    <h1>Sin permisos</h1>
+                    <p>Esta página es solo para usuarios con rol Administrador.</p>
+                }
+                else
+                {
+                    <h1>Sesión requerida</h1>
+                    <p>Necesitás <a href="login">iniciar sesión</a> para ver esta página.</p>
+                }
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>

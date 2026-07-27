@@ -1,0 +1,14 @@
+.formulario-importar {
+    max-width: 24rem;
+}
+
+.formulario-importar ::deep .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.formulario-importar ::deep .validation-message {
+    color: #b02a25;
+    font-size: 0.8125rem;
+}

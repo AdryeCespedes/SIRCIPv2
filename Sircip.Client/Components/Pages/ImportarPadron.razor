@@ -1,0 +1,88 @@
+@page "/importar"
+@attribute [Authorize(Roles = "Administrador")]
+@inject PadronApiClient PadronApi
+
+<PageTitle>Importar padrón</PageTitle>
+
+<h1>Importar padrón</h1>
+<p class="text-muted">
+    El archivo .txt tiene que estar en el directorio de importación del servidor.
+    Indicá su nombre y el período al que corresponde.
+</p>
+
+@if (_resultado is { Exitosa: true, Importacion: not null })
+{
+    <div class="alert alert-success">
+        Se importó el padrón de <strong>@FormatearPeriodo(_resultado.Importacion.Periodo)</strong>
+        con <strong>@_resultado.Importacion.CantidadRegistros.ToString("N0")</strong> registros.
+        <a href="importaciones" class="alert-link">Ver el historial</a>.
+    </div>
+}
+else if (_resultado is { Exitosa: false })
+{
+    <div class="alert alert-danger">
+        No se importó el padrón: @_resultado.Error
+    </div>
+}
+
+<EditForm Model="Formulario" OnValidSubmit="ImportarAsync" FormName="importar-padron" class="formulario-importar">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label" for="anio">Año</label>
+        <InputNumber id="anio" class="form-control form-control-sm" @bind-Value="Formulario.Anio" />
+        <ValidationMessage For="() => Formulario.Anio" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="mes">Mes</label>
+        <InputSelect id="mes" class="form-select form-select-sm" @bind-Value="Formulario.Mes">
+            @for (var numero = 1; numero <= 12; numero++)
+            {
+                var mes = numero;
+                <option value="@mes">@($"{mes:00} - {NombreDelMes(mes)}")</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="ruta">Archivo</label>
+        <InputText id="ruta" class="form-control form-control-sm" @bind-Value="Formulario.RutaArchivo"
+                   placeholder="padron-202602.txt" />
+        <ValidationMessage For="() => Formulario.RutaArchivo" />
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-sm">Importar</button>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private DatosDelFormulario Formulario { get; set; } = new();
+
+    private ResultadoImportacion? _resultado;
+
+    protected override void OnInitialized() => Formulario ??= new DatosDelFormulario();
+
+    private async Task ImportarAsync()
+    {
+        _resultado = await PadronApi.ImportarAsync(
+            Formulario.Anio, Formulario.Mes, Formulario.RutaArchivo ?? string.Empty);
+    }
+
+    private static string FormatearPeriodo(int periodo) => $"{periodo % 100:00}/{periodo / 100}";
+
+    private static string NombreDelMes(int mes) =>
+        new DateTime(2000, mes, 1).ToString("MMMM", new System.Globalization.CultureInfo("es-AR"));
+
+    public class DatosDelFormulario
+    {
+        [Range(2000, 9999, ErrorMessage = "El año debe estar entre 2000 y 9999.")]
+        public int Anio { get; set; } = DateTime.Today.Year;
+
+        [Range(1, 12)]
+        public int Mes { get; set; } = DateTime.Today.Month;
+
+        [Required(ErrorMessage = "Indicá el nombre del archivo del padrón.")]
+        public string? RutaArchivo { get; set; }
+    }
+}

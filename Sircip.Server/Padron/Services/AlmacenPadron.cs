@@ -26,6 +26,23 @@ public class AlmacenPadron
 
     public LectorPadronBinario Abrir(int periodo) => new(RutaDelPeriodo(periodo));
 
+    /// <summary>
+    /// Borra el archivo del período. Devuelve <c>false</c> si no existía, que no
+    /// es un error: puede haber quedado un período sin archivo si una eliminación
+    /// anterior no llegó a completarse.
+    /// </summary>
+    public bool EliminarPeriodo(int periodo)
+    {
+        var ruta = RutaDelPeriodo(periodo);
+        if (!File.Exists(ruta))
+        {
+            return false;
+        }
+
+        File.Delete(ruta);
+        return true;
+    }
+
     public void AsegurarDirectorios()
     {
         Directory.CreateDirectory(DirectorioImportacion);

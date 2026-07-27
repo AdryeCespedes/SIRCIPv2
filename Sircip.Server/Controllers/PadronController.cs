@@ -25,11 +25,16 @@ public class PadronController : ControllerBase
 
     private readonly SircipDbContext _db;
     private readonly ServicioImportacionPadron _servicioImportacion;
+    private readonly ServicioEliminacionPadron _servicioEliminacion;
 
-    public PadronController(SircipDbContext db, ServicioImportacionPadron servicioImportacion)
+    public PadronController(
+        SircipDbContext db,
+        ServicioImportacionPadron servicioImportacion,
+        ServicioEliminacionPadron servicioEliminacion)
     {
         _db = db;
         _servicioImportacion = servicioImportacion;
+        _servicioEliminacion = servicioEliminacion;
     }
 
     /// <summary>Importa el padrón de un período desde un archivo .txt (RF-03).</summary>
@@ -116,6 +121,32 @@ public class PadronController : ControllerBase
         if (importacion is null)
         {
             return NotFound($"El período {periodo} no tiene un padrón importado.");
+        }
+
+        return Ok(AResponse(importacion, importacion.Usuario.NombreUsuario));
+    }
+
+    /// <summary>
+    /// Elimina el padrón de un período con borrado lógico (RF-09). La constancia
+    /// sigue en el historial marcada como borrada, y el período queda libre para
+    /// volver a importarse.
+    /// </summary>
+    [HttpDelete("importaciones/{anio:int}/{mes:int}")]
+    public async Task<ActionResult<ImportacionResponse>> EliminarPadronDelPeriodo(
+        int anio,
+        int mes,
+        CancellationToken cancelacion)
+    {
+        if (!TryArmarPeriodo(anio, mes, out var periodo, out var error))
+        {
+            return BadRequest(error);
+        }
+
+        var importacion = await _servicioEliminacion.EliminarAsync(periodo, cancelacion);
+
+        if (importacion is null)
+        {
+            return NotFound($"El período {periodo} no tiene un padrón importado que eliminar.");
         }
 
         return Ok(AResponse(importacion, importacion.Usuario.NombreUsuario));

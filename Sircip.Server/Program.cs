@@ -68,6 +68,7 @@ builder.Services.AddScoped<SeedUsuario>();
 builder.Services.Configure<OpcionesPadron>(builder.Configuration.GetSection(OpcionesPadron.SectionName));
 builder.Services.AddSingleton<AlmacenPadron>();
 builder.Services.AddScoped<ServicioImportacionPadron>();
+builder.Services.AddScoped<ServicioEliminacionPadron>();
 
 var app = builder.Build();
 
